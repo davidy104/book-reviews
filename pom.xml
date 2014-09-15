@@ -447,5 +447,6 @@
 
 	<module>book-reviews-jpa-repositorybook-reviews-shared</module>
     <module>book-reviews-jpa-repository</module>
-  </modules>
+    <module>book-reviews-ds</module>
+	</modules>
 </project>
