@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>nz.co.bookreviews</groupId>
@@ -39,21 +40,6 @@
 
 	<dependencyManagement>
 		<dependencies>
-			<dependency>
-				<groupId>com.fasterxml.jackson.core</groupId>
-				<artifactId>jackson-annotations</artifactId>
-				<version>${jackson.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.fasterxml.jackson.core</groupId>
-				<artifactId>jackson-core</artifactId>
-				<version>${jackson.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.fasterxml.jackson.core</groupId>
-				<artifactId>jackson-databind</artifactId>
-				<version>${jackson.version}</version>
-			</dependency>
 			<dependency>
 				<groupId>org.neo4j</groupId>
 				<artifactId>neo4j</artifactId>
@@ -315,6 +301,17 @@
 			<!-- camel -->
 			<dependency>
 				<groupId>org.apache.camel</groupId>
+				<artifactId>camel-test</artifactId>
+				<version>${camel.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.camel</groupId>
+				<artifactId>camel-http4</artifactId>
+				<version>${camel.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.camel</groupId>
 				<artifactId>camel-core</artifactId>
 				<version>${camel.version}</version>
 			</dependency>
@@ -445,8 +442,9 @@
 	</build>
 	<modules>
 
-	<module>book-reviews-jpa-repositorybook-reviews-shared</module>
-    <module>book-reviews-jpa-repository</module>
-    <module>book-reviews-ds</module>
+		<module>book-reviews-jpa-repositorybook-reviews-shared</module>
+		<module>book-reviews-jpa-repository</module>
+		<module>book-reviews-ds</module>
+		<module>book-reviews-integration</module>
 	</modules>
 </project>
