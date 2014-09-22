@@ -441,9 +441,10 @@
 		</pluginManagement>
 	</build>
 	<modules>
-		<module>book-reviews-jpa-repositorybook-reviews-shared</module>
 		<module>book-reviews-jpa-repository</module>
 		<module>book-reviews-integration</module>
 		<module>book-reviews-jpa-ds</module>
+		<module>book-reviews-shared</module>
+		<module>book-reviews-neo4j-ds</module>
 	</modules>
 </project>
