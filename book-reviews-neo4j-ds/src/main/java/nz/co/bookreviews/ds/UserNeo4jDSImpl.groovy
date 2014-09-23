@@ -52,6 +52,20 @@ class UserNeo4jDSImpl implements UserDS{
 		log.debug 'self:{} $self'
 		Long id = Long.valueOf(self.substring(self.lastIndexOf('/')+1,self.length()))
 		log.debug 'id:{} $id'
+
+		String nodeUri = neo4jHttpUri+"node/"+id
+		String uniqueNodeReqBody = "{\"value\" : \""+userName+"\",\"uri\" : \""+nodeUri+"\",\"key\" : \"userName\"}"
+
+		webResource = jerseyClient.resource(neo4jHttpUri)
+				.path("index/node/favorites").queryParam("uniqueness", "create_or_fail")
+		response = webResource.accept(MediaType.APPLICATION_JSON)
+				.type(MediaType.APPLICATION_JSON)
+				.post(ClientResponse.class, uniqueNodeReqBody)
+		if(response.getStatusInfo().statusCode != Status.CREATED.code){
+			//might need to roll back previous statement
+			throw new Exception('User create failed.')
+		}
+
 		return new User(userId:id,userName:userName,password:password)
 	}
 
