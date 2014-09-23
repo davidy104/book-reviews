@@ -1,4 +1,4 @@
-package nz.co.bookreviews.ds.test.logic;
+package nz.co.bookreviews.ds.jpa.test.logic;
 
 import static nz.co.bookreviews.data.entity.QUserEntity.userEntity
 import static org.junit.Assert.*
@@ -10,7 +10,7 @@ import nz.co.bookreviews.NotFoundException
 import nz.co.bookreviews.data.User
 import nz.co.bookreviews.data.entity.UserEntity
 import nz.co.bookreviews.data.repository.UserRepository
-import nz.co.bookreviews.ds.UserJpaRepositoryDSImpl
+import nz.co.bookreviews.ds.jpa.impl.UserJpaRepositoryDSImpl;
 
 import org.junit.Test
 import org.junit.runner.RunWith

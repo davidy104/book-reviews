@@ -1,6 +1,6 @@
-package nz.co.bookreviews.ds
+package nz.co.bookreviews.ds.neo4j.impl
 
-import static nz.co.bookreviews.ds.Neo4jJsonConvertUtil.getNodeUriFromTransStatementsResponse
+import static nz.co.bookreviews.ds.neo4j.Neo4jJsonConvertUtil.getNodeUriFromTransStatementsResponse
 import static nz.co.bookreviews.util.JerseyClientUtil.getResponsePayload
 import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
@@ -11,6 +11,7 @@ import javax.ws.rs.core.Response.Status
 
 import nz.co.bookreviews.NotFoundException
 import nz.co.bookreviews.data.User
+import nz.co.bookreviews.ds.neo4j.UserDS
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service

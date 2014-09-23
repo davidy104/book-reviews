@@ -22,7 +22,7 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 @Configuration
 @EnableTransactionManagement
-@EnableJpaRepositories(basePackages = "nz.co.neo4j.sample.migration.bookshop.data.repository", repositoryFactoryBeanClass = BaseRepositoryFactoryBean.class)
+@EnableJpaRepositories(basePackages = "nz.co.bookreviews.data.repository", repositoryFactoryBeanClass = BaseRepositoryFactoryBean.class)
 @PropertySource("classpath:jpa.properties")
 public class InfrastructureContextConfiguration {
 	@Resource

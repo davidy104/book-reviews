@@ -1,4 +1,4 @@
-package nz.co.bookreviews.ds
+package nz.co.bookreviews.ds.jpa.impl
 
 import static nz.co.bookreviews.data.entity.QUserEntity.userEntity
 import groovy.util.logging.Slf4j
@@ -10,6 +10,7 @@ import nz.co.bookreviews.NotFoundException
 import nz.co.bookreviews.data.User
 import nz.co.bookreviews.data.entity.UserEntity
 import nz.co.bookreviews.data.repository.UserRepository
+import nz.co.bookreviews.ds.jpa.UserDS
 
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

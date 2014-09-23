@@ -6,7 +6,7 @@ import groovy.util.logging.Slf4j
 import javax.annotation.Resource
 
 import nz.co.bookreviews.data.User
-import nz.co.bookreviews.ds.UserDS
+import nz.co.bookreviews.ds.neo4j.UserDS
 
 import org.junit.Test
 import org.junit.runner.RunWith

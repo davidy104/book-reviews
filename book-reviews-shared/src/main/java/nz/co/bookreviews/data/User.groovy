@@ -10,4 +10,6 @@ class User {
 	String userName
 	String password
 	Date createDate
+	String nodeUri
+	String uniqueIndex
 }

@@ -1,4 +1,4 @@
-package nz.co.bookreviews.ds
+package nz.co.bookreviews.ds.jpa
 
 import nz.co.bookreviews.NotFoundException
 import nz.co.bookreviews.data.User

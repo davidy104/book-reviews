@@ -1,4 +1,4 @@
-package nz.co.bookreviews.ds
+package nz.co.bookreviews.ds.neo4j
 
 import groovy.json.JsonSlurper;
 

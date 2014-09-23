@@ -1,4 +1,4 @@
-package nz.co.bookreviews.ds.test.integration;
+package nz.co.bookreviews.ds.jpa.test.integration;
 
 import static org.junit.Assert.assertNotNull
 import groovy.util.logging.Slf4j
@@ -7,8 +7,8 @@ import javax.annotation.Resource
 
 import nz.co.bookreviews.NotFoundException
 import nz.co.bookreviews.data.User
-import nz.co.bookreviews.ds.UserDS
-import nz.co.bookreviews.ds.test.JpaDsTestContextConfiguration
+import nz.co.bookreviews.ds.jpa.UserDS
+import nz.co.bookreviews.ds.jpa.test.JpaDsTestContextConfiguration
 
 import org.junit.Test
 import org.junit.runner.RunWith

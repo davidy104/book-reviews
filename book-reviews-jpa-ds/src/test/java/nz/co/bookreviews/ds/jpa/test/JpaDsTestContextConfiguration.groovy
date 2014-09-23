@@ -1,4 +1,4 @@
-package nz.co.bookreviews.ds.test;
+package nz.co.bookreviews.ds.jpa.test;
 
 import javax.annotation.Resource
 
@@ -14,7 +14,7 @@ import org.springframework.transaction.support.TransactionTemplate
 
 @Configuration
 @Import(value = [InfrastructureContextConfiguration.class ])
-@ComponentScan("nz.co.neo4j.sample.migration.bookshop.ds")
+@ComponentScan("nz.co.bookreviews.ds.jpa")
 public class JpaDsTestContextConfiguration {
 
 	@Resource
