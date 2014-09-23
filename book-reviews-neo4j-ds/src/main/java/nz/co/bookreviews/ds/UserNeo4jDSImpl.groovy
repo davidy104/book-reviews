@@ -1,5 +1,6 @@
 package nz.co.bookreviews.ds
 
+import static nz.co.bookreviews.ds.Neo4jJsonConvertUtil.getNodeUriFromTransStatementsResponse
 import static nz.co.bookreviews.util.JerseyClientUtil.getResponsePayload
 import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
@@ -46,8 +47,8 @@ class UserNeo4jDSImpl implements UserDS{
 		}
 		String respStr = getResponsePayload(response)
 		log.debug 'response:{} $respStr'
-		Map restMap = (Map)((ArrayList)((Map)((ArrayList)((Map)((ArrayList)((Map)jsonSlurper.parseText(respStr)).get('results')).get(1)).get('data')).get(0)).get('rest')).get(0)
-		String self = restMap.get('self')
+		//		Map restMap = (Map)((ArrayList)((Map)((ArrayList)((Map)((ArrayList)((Map)jsonSlurper.parseText(respStr)).get('results')).get(1)).get('data')).get(0)).get('rest')).get(0)
+		String self = getNodeUriFromTransStatementsResponse(respStr,1)
 		log.debug 'self:{} $self'
 		Long id = Long.valueOf(self.substring(self.lastIndexOf('/')+1,self.length()))
 		log.debug 'id:{} $id'
