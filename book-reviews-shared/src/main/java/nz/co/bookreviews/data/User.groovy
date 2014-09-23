@@ -11,5 +11,4 @@ class User {
 	String password
 	Date createDate
 	String nodeUri
-	String uniqueIndex
 }

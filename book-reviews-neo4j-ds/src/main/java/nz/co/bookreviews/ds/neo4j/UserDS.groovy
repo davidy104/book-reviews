@@ -6,7 +6,8 @@ import nz.co.bookreviews.data.User;
 interface UserDS {
 	User createUser(String userName, String password)
 	User loginUser(String userName, String password)
-	User getUserById(Long userId) throws NotFoundException
-	User getUserByName(String userName) throws NotFoundException
-	User updateUser(Long userId,User updatedUser) throws NotFoundException
+	User getUserByUri(String nodeUri)
+	User getUserByName(String userName)
+	User updateUserByUserName(String userName,User updatedUser)
+	void deleteUserByName(String userName)
 }

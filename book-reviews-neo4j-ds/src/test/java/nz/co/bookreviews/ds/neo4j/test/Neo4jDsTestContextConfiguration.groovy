@@ -1,4 +1,4 @@
-package nz.co.bookreviews.ds.test;
+package nz.co.bookreviews.ds.neo4j.test;
 
 import nz.co.bookreviews.config.ApplicationContextConfiguration
 
@@ -8,6 +8,6 @@ import org.springframework.context.annotation.Import
 
 @Configuration
 @Import(value = [ApplicationContextConfiguration.class ])
-@ComponentScan("nz.co.bookreviews.ds")
+@ComponentScan("nz.co.bookreviews.ds.neo4j")
 public class Neo4jDsTestContextConfiguration {
 }

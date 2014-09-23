@@ -1,6 +1,6 @@
 package nz.co.bookreviews.ds.neo4j.impl
 
-import static nz.co.bookreviews.ds.neo4j.Neo4jJsonConvertUtil.getNodeUriFromTransStatementsResponse
+
 import static nz.co.bookreviews.util.JerseyClientUtil.getResponsePayload
 import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
@@ -9,8 +9,10 @@ import javax.annotation.Resource
 import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.Response.Status
 
+import nz.co.bookreviews.ConflictException
 import nz.co.bookreviews.NotFoundException
 import nz.co.bookreviews.data.User
+import nz.co.bookreviews.ds.neo4j.Neo4jSupport
 import nz.co.bookreviews.ds.neo4j.UserDS
 
 import org.springframework.beans.factory.annotation.Value
@@ -26,6 +28,8 @@ class UserNeo4jDSImpl implements UserDS{
 
 	@Resource
 	Client jerseyClient
+	@Resource
+	Neo4jSupport neo4jSupport
 
 	@Value('${neo4j.host:http://localhost:7474/db/data/}')
 	String neo4jHttpUri
@@ -48,14 +52,10 @@ class UserNeo4jDSImpl implements UserDS{
 		}
 		String respStr = getResponsePayload(response)
 		log.debug 'response:{} $respStr'
-		//		Map restMap = (Map)((ArrayList)((Map)((ArrayList)((Map)((ArrayList)((Map)jsonSlurper.parseText(respStr)).get('results')).get(1)).get('data')).get(0)).get('rest')).get(0)
-		String self = getNodeUriFromTransStatementsResponse(respStr,1)
-		log.debug 'self:{} $self'
-		Long id = Long.valueOf(self.substring(self.lastIndexOf('/')+1,self.length()))
-		log.debug 'id:{} $id'
 
-		String nodeUri = neo4jHttpUri+"node/"+id
-		String uniqueNodeReqBody = "{\"value\" : \""+userName+"\",\"uri\" : \""+nodeUri+"\",\"key\" : \"userName\"}"
+		String self = neo4jSupport.getNodeUriFromTransStatementsResponse(respStr,1)
+		log.debug 'self:{} $self'
+		String uniqueNodeReqBody = "{\"value\" : \""+userName+"\",\"uri\" : \""+self+"\",\"key\" : \"userName\"}"
 
 		webResource = jerseyClient.resource(neo4jHttpUri)
 				.path("index/node/favorites").queryParam("uniqueness", "create_or_fail")
@@ -63,41 +63,102 @@ class UserNeo4jDSImpl implements UserDS{
 				.type(MediaType.APPLICATION_JSON)
 				.post(ClientResponse.class, uniqueNodeReqBody)
 		if(response.getStatusInfo().statusCode != Status.CREATED.code){
-			//might need to roll back previous statement
+			try {
+				neo4jSupport.deleteNodeByUri(self)
+			} catch (e) {
+				throw new Exception('User['+self+'] create failed. it is supposed to be deleted manually.')
+			}
 			throw new Exception('User create failed.')
 		}
-
-		return new User(userId:id,userName:userName,password:password)
+		return new User(nodeUri:self,userName:userName,password:password)
 	}
 
 	@Override
-	public User loginUser(String userName, String password) {
-
-		return null;
+	User loginUser(String userName, String password) {
+		return null
 	}
 
-	//http://localhost:7474/db/data/node/14800000
 	@Override
-	public User getUserById(final Long userId) throws NotFoundException {
-		WebResource webResource = jerseyClient.resource(neo4jHttpUri).path("node/").path(userId)
-		ClientResponse response = webResource
-				.accept(MediaType.APPLICATION_JSON)
+	User getUserByUri(final String userNodeUri) {
+		Map resultMap
+		try {
+			resultMap = neo4jSupport.getNodeByUri(userNodeUri)
+		} catch (e) {
+			throw new NotFoundException('User not found by uri[${userNodeUri}].',e)
+		}
+		Map dataMap = (Map)resultMap.get('data')
+		User found = new User(userName:dataMap.get('userName'),password:dataMap.get('password'),nodeUri:userNodeUri)
+		return found
+	}
+
+	@Override
+	User getUserByName(final String userName) {
+		Map<String,String> mapResult =  doQueryUserByName(userName)
+		return new User(nodeUri:mapResult.get('nodeUri'),password:mapResult.get('password'),userName:userName)
+	}
+
+	@Override
+	User updateUserByUserName(final String userName,final User updatedUser){
+		Map<String,String> mapResult = doQueryUserByName(userName)
+		String updateUserName = updatedUser.userName?:mapResult.get('userName')
+		String updatePassword = updatedUser.password?:mapResult.get('password')
+		String updateJson = "{\"query\":\"MATCH (u:User {userName: {userName}}) SET u = { props } RETURN u\",\"params\":{\"userName\":\""+userName+"\",\"props\":{\"userName\":\""+updateUserName+"\",\"password\":\""+updatePassword+"\"}}}"
+		WebResource webResource = jerseyClient.resource(neo4jHttpUri)
+				.path("cypher")
+		ClientResponse response = webResource.accept(MediaType.APPLICATION_JSON)
 				.type(MediaType.APPLICATION_JSON)
-				.get(ClientResponse.class)
+				.post(ClientResponse.class, updateJson)
+		if(response.getStatusInfo().statusCode != Status.OK.code){
+			throw new RuntimeException('User update fail.')
+		}
+		return new User(nodeUri:mapResult.get('nodeUri'),password:updatePassword,userName:updateUserName)
+	}
+
+	/**
+	 * User who has no relationships with other, can only be deleted
+	 */
+	@Override
+	public void deleteUserByName(final String userName) {
+		String queryNodeHasNoRelationship = "{\"query\":\"MATCH (u:User{userName:{userName}}) WHERE NOT (u)-[]->() RETURN u\",\"params\":{\"userName\":\""+userName+"\"}}"
+		WebResource webResource = jerseyClient.resource(neo4jHttpUri)
+				.path("cypher")
+		ClientResponse response = webResource.accept(MediaType.APPLICATION_JSON)
+				.type(MediaType.APPLICATION_JSON)
+				.post(ClientResponse.class, queryNodeHasNoRelationship)
+		if(response.getStatusInfo().statusCode != Status.OK.code){
+			throw new RuntimeException('Delete User fail.')
+		}
 		String respStr = getResponsePayload(response)
-		return null;
+		ArrayList dataList = (ArrayList)((Map)jsonSlurper.parseText(respStr)).get('data')
+		if(dataList.isEmpty()){
+			throw new ConflictException('User[${userName} can not be deleted as he has relationships with others]')
+		}
+		String deleteNodeJson = "{\"query\":\"MATCH (u:User{userName:'"+userName+"'}) DELETE u\"}}"
+		response = webResource.accept(MediaType.APPLICATION_JSON)
+				.type(MediaType.APPLICATION_JSON)
+				.post(ClientResponse.class, deleteNodeJson)
+		if(response.getStatusInfo().statusCode != Status.OK.code){
+			throw new RuntimeException('Delete User fail.')
+		}
 	}
 
-	@Override
-	public User getUserByName(String userName) throws NotFoundException {
+	Map<String,String> doQueryUserByName(final String userName){
+		String queryJson = "{\"query\":\"MATCH (u:User) WHERE u.userName = '"+userName+"' RETURN u \"}"
+		WebResource webResource = jerseyClient.resource(neo4jHttpUri)
+				.path("cypher")
+		ClientResponse response = webResource.accept(MediaType.APPLICATION_JSON)
+				.type(MediaType.APPLICATION_JSON)
+				.post(ClientResponse.class, queryJson)
 
-		return null;
-	}
-
-	@Override
-	public User updateUser(Long userId, User updatedUser)
-	throws NotFoundException {
-
-		return null;
+		if(response.getStatusInfo().statusCode != Status.OK.code){
+			throw new RuntimeException('Unknown exception.')
+		}
+		Map<String,String> data
+		try {
+			data = neo4jSupport.getDataFromCypherStatement(getResponsePayload(response))
+		} catch ( e) {
+			throw new NotFoundException("User not found by name[${userName}].")
+		}
+		return data
 	}
 }
