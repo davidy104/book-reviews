@@ -9,6 +9,7 @@ import javax.annotation.Resource
 import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.Response.Status
 
+import nz.co.bookreviews.AuthenticationException
 import nz.co.bookreviews.ConflictException
 import nz.co.bookreviews.NotFoundException
 import nz.co.bookreviews.data.User
@@ -74,8 +75,12 @@ class UserNeo4jDSImpl implements UserDS{
 	}
 
 	@Override
-	User loginUser(String userName, String password) {
-		return null
+	User loginUser(final String userName,final String password) {
+		User found = getUserByName(userName)
+		if(password != found.password){
+			throw new AuthenticationException('Password is incorrect.')
+		}
+		return found
 	}
 
 	@Override

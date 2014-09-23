@@ -5,6 +5,7 @@ import groovy.util.logging.Slf4j
 
 import javax.annotation.Resource
 
+import nz.co.bookreviews.AuthenticationException
 import nz.co.bookreviews.NotFoundException
 import nz.co.bookreviews.data.User
 import nz.co.bookreviews.ds.neo4j.UserDS
@@ -59,5 +60,30 @@ class UserNeo4jDSIntegrationTest {
 	@Test(expected=NotFoundException.class)
 	void testQueryNonexistUserByName(){
 		userNeo4jRepositoryDs.getUserByName("NOT FOUND USER")
+	}
+
+	@Test
+	void testRegistedUserLogin(){
+		User loginUser = userNeo4jRepositoryDs.loginUser("dav", "654321")
+		assertNotNull(loginUser)
+		assertEquals('654321',loginUser.password)
+	}
+
+	@Test(expected=AuthenticationException.class)
+	void testNotRegistedUserLogin(){
+		userNeo4jRepositoryDs.loginUser("dav", "9999900")
+	}
+
+	@Test
+	void testUpdateUserByUserName(){
+		User add = userNeo4jRepositoryDs.createUser("mike", "123")
+		assertNotNull(add)
+		User updatedUser = new User(userName:'jordan',password:'456')
+		updatedUser = userNeo4jRepositoryDs.updateUserByUserName("mike", updatedUser)
+		assertNotNull(updatedUser)
+		assertEquals('456',updatedUser.password)
+		assertEquals('jordan',updatedUser.userName)
+		log.info "updatedUser: {} $updatedUser"
+		testUserNames << updatedUser.userName
 	}
 }
