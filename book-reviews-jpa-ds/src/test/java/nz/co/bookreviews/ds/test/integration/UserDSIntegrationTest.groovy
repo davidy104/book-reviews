@@ -8,7 +8,7 @@ import javax.annotation.Resource
 import nz.co.bookreviews.NotFoundException
 import nz.co.bookreviews.data.User
 import nz.co.bookreviews.ds.UserDS
-import nz.co.bookreviews.ds.test.DsTestContextConfiguration
+import nz.co.bookreviews.ds.test.JpaDsTestContextConfiguration
 
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -18,7 +18,7 @@ import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = [ DsTestContextConfiguration.class ])
+@ContextConfiguration(classes = [ JpaDsTestContextConfiguration.class ])
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 @Slf4j
 public class UserDSIntegrationTest {

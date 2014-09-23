@@ -1,0 +1,10 @@
+{
+	"statements":[
+		{
+			"statement":"CREATE (n:User { userName : 'dav',password : '' })"
+		},
+		{
+			"statement":"MATCH (n {userName:'',password : ''}) SET n :User RETURN n"
+		}
+	]
+}

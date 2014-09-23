@@ -15,7 +15,7 @@ import org.springframework.transaction.support.TransactionTemplate
 @Configuration
 @Import(value = [InfrastructureContextConfiguration.class ])
 @ComponentScan("nz.co.neo4j.sample.migration.bookshop.ds")
-public class DsTestContextConfiguration {
+public class JpaDsTestContextConfiguration {
 
 	@Resource
 	PlatformTransactionManager transactionManager;

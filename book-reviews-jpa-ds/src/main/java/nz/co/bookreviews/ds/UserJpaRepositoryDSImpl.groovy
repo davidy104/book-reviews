@@ -50,7 +50,6 @@ class UserJpaRepositoryDSImpl implements UserDS{
 	}
 
 
-
 	@Override
 	public User getUserById(final Long userId) throws NotFoundException {
 		UserEntity foundEntity
