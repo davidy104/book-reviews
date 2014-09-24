@@ -52,7 +52,8 @@ class Neo4jSupport {
 	}
 
 
-	Map<String,String> getDataFromCypherStatement(final String response){
+
+	Map<String,Map<String,String>> getDataFromCypherStatement(final String response){
 		def result = [:]
 		def resultDataMap = [:]
 		JsonSlurper jsonSlurper = new JsonSlurper()
@@ -61,14 +62,13 @@ class Neo4jSupport {
 		if(datajson.isEmpty()){
 			throw new RuntimeException('Data Not found.')
 		}
-		if(datajson){
-			ArrayList innerData = (ArrayList)datajson.get(0)
+		datajson.each {
+			ArrayList innerData = (ArrayList)it
 			if(innerData){
 				innerData.each {
 					Map datamap = (Map)it
 					resultDataMap = (Map)datamap['data']
-					result.putAll(resultDataMap)
-					result.put('nodeUri' , datamap['self'])
+					result.put(datamap['self'] , resultDataMap)
 				}
 			}
 		}

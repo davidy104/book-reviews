@@ -11,4 +11,5 @@ class Person {
 	String firstName
 	Date birthDate
 	User user
+	String nodeUri
 }

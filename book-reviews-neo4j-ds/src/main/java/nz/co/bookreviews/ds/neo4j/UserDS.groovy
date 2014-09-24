@@ -1,7 +1,7 @@
 package nz.co.bookreviews.ds.neo4j;
 
-import nz.co.bookreviews.NotFoundException;
-import nz.co.bookreviews.data.User;
+import nz.co.bookreviews.data.Page
+import nz.co.bookreviews.data.User
 
 interface UserDS {
 	User createUser(String userName, String password)
@@ -10,4 +10,5 @@ interface UserDS {
 	User getUserByName(String userName)
 	User updateUserByUserName(String userName,User updatedUser)
 	void deleteUserByName(String userName)
+	Page getUsers(int currentPageNo)
 }

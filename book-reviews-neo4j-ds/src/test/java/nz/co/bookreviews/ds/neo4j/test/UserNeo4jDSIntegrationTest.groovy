@@ -7,6 +7,7 @@ import javax.annotation.Resource
 
 import nz.co.bookreviews.AuthenticationException
 import nz.co.bookreviews.NotFoundException
+import nz.co.bookreviews.data.Page
 import nz.co.bookreviews.data.User
 import nz.co.bookreviews.ds.neo4j.UserDS
 
@@ -72,6 +73,13 @@ class UserNeo4jDSIntegrationTest {
 	@Test(expected=AuthenticationException.class)
 	void testNotRegistedUserLogin(){
 		userNeo4jRepositoryDs.loginUser("dav", "9999900")
+	}
+
+	@Test
+	void testPagingUsers(){
+		testCreateUser()
+		Page page = userNeo4jRepositoryDs.getUsers(0)
+		log.info "page: {} $page"
 	}
 
 	@Test

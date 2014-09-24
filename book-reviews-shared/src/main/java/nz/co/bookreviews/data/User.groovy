@@ -11,4 +11,5 @@ class User {
 	String password
 	Date createDate
 	String nodeUri
+	def votes = []
 }

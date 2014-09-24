@@ -12,6 +12,7 @@ import javax.ws.rs.core.Response.Status
 import nz.co.bookreviews.AuthenticationException
 import nz.co.bookreviews.ConflictException
 import nz.co.bookreviews.NotFoundException
+import nz.co.bookreviews.data.Page;
 import nz.co.bookreviews.data.User
 import nz.co.bookreviews.ds.neo4j.Neo4jSupport
 import nz.co.bookreviews.ds.neo4j.UserDS
@@ -147,6 +148,38 @@ class UserNeo4jDSImpl implements UserDS{
 		}
 	}
 
+	@Override
+	Page getUsers(final int currentPageNo) {
+		Page page
+		String queryTotalCount = "{\"query\":\"MATCH (u:User) RETURN COUNT(*) as total\"}"
+		String queryPageJson = "{\"query\":\"MATCH (u:User) RETURN u SKIP "+currentPageNo+" LIMIT "+Page.PAGE_SIZE+"\"}"
+		WebResource webResource = jerseyClient.resource(neo4jHttpUri)
+				.path("cypher")
+		ClientResponse response = webResource.accept(MediaType.APPLICATION_JSON)
+				.type(MediaType.APPLICATION_JSON)
+				.post(ClientResponse.class, queryTotalCount)
+		if(response.getStatusInfo().statusCode != Status.OK.code){
+			throw new RuntimeException('getUsers fail.')
+		}
+		String respStr = getResponsePayload(response)
+		int totalCount = Integer.valueOf(((ArrayList)((ArrayList)((Map)jsonSlurper.parseText(respStr)).get('data')).get(0)).get(0))
+		log.debug "totalCount: {} $totalCount"
+		page = new Page(currentPageNo:currentPageNo,totalCount:totalCount)
+		response = webResource.accept(MediaType.APPLICATION_JSON)
+				.type(MediaType.APPLICATION_JSON)
+				.post(ClientResponse.class, queryPageJson)
+		if(response.getStatusInfo().statusCode != Status.OK.code){
+			throw new RuntimeException('getUsers fail.')
+		}
+		Map<String,Map<String,String>> contentResultMap = neo4jSupport.getDataFromCypherStatement(getResponsePayload(response))
+		log.info "contentResultMap size: {} "+contentResultMap.size()
+		contentResultMap.each {k,v->
+			Map usrMap = v
+			page.content << new User(nodeUri:k,userName:usrMap.get('userName'),password:usrMap.get('password'))
+		}
+		return page
+	}
+
 	Map<String,String> doQueryUserByName(final String userName){
 		String queryJson = "{\"query\":\"MATCH (u:User) WHERE u.userName = '"+userName+"' RETURN u \"}"
 		WebResource webResource = jerseyClient.resource(neo4jHttpUri)
@@ -158,10 +191,14 @@ class UserNeo4jDSImpl implements UserDS{
 		if(response.getStatusInfo().statusCode != Status.OK.code){
 			throw new RuntimeException('Unknown exception.')
 		}
-		Map<String,String> data
+		def data = [:]
+		Map<String,Map<String,String>> resultMap = [:]
 		try {
-			data = neo4jSupport.getDataFromCypherStatement(getResponsePayload(response))
-		} catch ( e) {
+			resultMap = neo4jSupport.getDataFromCypherStatement(getResponsePayload(response))
+			Map.Entry<String,Map<String,String>> entry = resultMap.entrySet().iterator().next()
+			data.put('nodeUri', entry.getKey())
+			data.putAll(entry.getValue())
+		} catch (e) {
 			throw new NotFoundException("User not found by name[${userName}].")
 		}
 		return data
