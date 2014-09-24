@@ -66,7 +66,7 @@ class CustomerNeo4jRepositoryDSImpl implements CustomerDS{
 		ClientResponse response = webResource.accept(MediaType.APPLICATION_JSON)
 				.type(MediaType.APPLICATION_JSON)
 				.post(ClientResponse.class, jsonBody)
-		if(response.getStatusInfo().statusCode != Status.OK.code){
+		if(response.getStatus() != Status.OK.code){
 			if(createNewUser){
 				//rollback created User
 				neo4jSupport.deleteNodeByUri(userNodeUri)
@@ -82,7 +82,7 @@ class CustomerNeo4jRepositoryDSImpl implements CustomerDS{
 				.type(MediaType.APPLICATION_JSON)
 				.post(ClientResponse.class, uniqueNodeReqBody)
 
-		if(response.getStatusInfo().statusCode != Status.CREATED.code){
+		if(response.getStatus() != Status.CREATED.code){
 			//TODO we need delete created Customer and user if created
 			throw new RuntimeException('Customer create failed.')
 		}
@@ -102,7 +102,27 @@ class CustomerNeo4jRepositoryDSImpl implements CustomerDS{
 
 
 	@Override
-	Customer getCustomerByEmail(String email) {
+	Customer getCustomerByEmail(final String email) {
+		Map<String,String> resultMap
+		String queryJson = "{\"query\":\"MATCH (p:Person) WHERE p.email = '"+email+"' RETURN p \"}"
+		WebResource webResource = jerseyClient.resource(neo4jHttpUri)
+				.path("cypher")
+		ClientResponse response = webResource.accept(MediaType.APPLICATION_JSON)
+				.type(MediaType.APPLICATION_JSON)
+				.post(ClientResponse.class, queryJson)
+
+		if(response.getStatus() != Status.OK.code){
+			throw new RuntimeException('Unknown exception.')
+		}
+		try {
+			resultMap = this.neo4jSupport.getSingleResultFromCypherStatement(getResponsePayload(response))
+		} catch (e) {
+			if(e instanceof RuntimeException && e.message == 'Data Not found.'){
+				throw new NotFoundException("Customer not found by email[${email}].")
+			}else {
+				throw e
+			}
+		}
 		return null
 	}
 
@@ -110,7 +130,7 @@ class CustomerNeo4jRepositoryDSImpl implements CustomerDS{
 
 	@Override
 	Page getAllCustomers(int pageOffset) {
-		
+
 		return null
 	}
 
@@ -129,7 +149,7 @@ class CustomerNeo4jRepositoryDSImpl implements CustomerDS{
 		ClientResponse response = webResource.accept(MediaType.APPLICATION_JSON)
 				.type(MediaType.APPLICATION_JSON)
 				.post(ClientResponse.class, updateJson)
-		if(response.getStatusInfo().statusCode != Status.OK.code){
+		if(response.getStatus() != Status.OK.code){
 			throw new RuntimeException('Customer update fail.')
 		}
 		try {

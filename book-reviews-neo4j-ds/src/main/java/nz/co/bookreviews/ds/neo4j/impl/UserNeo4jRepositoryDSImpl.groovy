@@ -59,7 +59,7 @@ class UserNeo4jRepositoryDSImpl implements UserDS{
 		ClientResponse response = webResource.accept(MediaType.APPLICATION_JSON)
 				.type(MediaType.APPLICATION_JSON)
 				.post(ClientResponse.class, createCypherStatement)
-		if(response.getStatusInfo().statusCode != Status.OK.code){
+		if(response.getStatus() != Status.OK.code){
 			throw new RuntimeException('User create failed.')
 		}
 		String respStr = getResponsePayload(response)
@@ -73,7 +73,7 @@ class UserNeo4jRepositoryDSImpl implements UserDS{
 		response = webResource.accept(MediaType.APPLICATION_JSON)
 				.type(MediaType.APPLICATION_JSON)
 				.post(ClientResponse.class, uniqueNodeReqBody)
-		if(response.getStatusInfo().statusCode != Status.CREATED.code){
+		if(response.getStatus() != Status.CREATED.code){
 			try {
 				neo4jSupport.deleteNodeByUri(self)
 			} catch (e) {
@@ -121,7 +121,7 @@ class UserNeo4jRepositoryDSImpl implements UserDS{
 		ClientResponse response = webResource.accept(MediaType.APPLICATION_JSON)
 				.type(MediaType.APPLICATION_JSON)
 				.post(ClientResponse.class, updateJson)
-		if(response.getStatusInfo().statusCode != Status.OK.code){
+		if(response.getStatus() != Status.OK.code){
 			throw new RuntimeException('User update fail.')
 		}
 		try {
@@ -147,7 +147,7 @@ class UserNeo4jRepositoryDSImpl implements UserDS{
 		ClientResponse response = webResource.accept(MediaType.APPLICATION_JSON)
 				.type(MediaType.APPLICATION_JSON)
 				.post(ClientResponse.class, queryNodeHasNoRelationship)
-		if(response.getStatusInfo().statusCode != Status.OK.code){
+		if(response.getStatus() != Status.OK.code){
 			throw new RuntimeException('Delete User fail.')
 		}
 		String respStr = getResponsePayload(response)
@@ -159,7 +159,7 @@ class UserNeo4jRepositoryDSImpl implements UserDS{
 		response = webResource.accept(MediaType.APPLICATION_JSON)
 				.type(MediaType.APPLICATION_JSON)
 				.post(ClientResponse.class, deleteNodeJson)
-		if(response.getStatusInfo().statusCode != Status.OK.code){
+		if(response.getStatus() != Status.OK.code){
 			throw new RuntimeException('Delete User fail.')
 		}
 	}
@@ -174,7 +174,7 @@ class UserNeo4jRepositoryDSImpl implements UserDS{
 		ClientResponse response = webResource.accept(MediaType.APPLICATION_JSON)
 				.type(MediaType.APPLICATION_JSON)
 				.post(ClientResponse.class, queryTotalCount)
-		if(response.getStatusInfo().statusCode != Status.OK.code){
+		if(response.getStatus() != Status.OK.code){
 			throw new RuntimeException('getUsers fail.')
 		}
 		String respStr = getResponsePayload(response)
@@ -184,7 +184,7 @@ class UserNeo4jRepositoryDSImpl implements UserDS{
 		response = webResource.accept(MediaType.APPLICATION_JSON)
 				.type(MediaType.APPLICATION_JSON)
 				.post(ClientResponse.class, queryPageJson)
-		if(response.getStatusInfo().statusCode != Status.OK.code){
+		if(response.getStatus() != Status.OK.code){
 			throw new RuntimeException('getUsers fail.')
 		}
 		Map<String,Map<String,String>> contentResultMap = neo4jSupport.getDataFromCypherStatement(getResponsePayload(response))
@@ -204,7 +204,7 @@ class UserNeo4jRepositoryDSImpl implements UserDS{
 				.type(MediaType.APPLICATION_JSON)
 				.post(ClientResponse.class, queryJson)
 
-		if(response.getStatusInfo().statusCode != Status.OK.code){
+		if(response.getStatus() != Status.OK.code){
 			throw new RuntimeException('Unknown exception.')
 		}
 		return this.neo4jSupport.getSingleResultFromCypherStatement(getResponsePayload(response))

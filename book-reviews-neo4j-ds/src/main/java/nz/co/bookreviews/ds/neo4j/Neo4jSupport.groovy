@@ -28,7 +28,7 @@ class Neo4jSupport {
 				.accept(MediaType.APPLICATION_JSON)
 				.type(MediaType.APPLICATION_JSON)
 				.get(ClientResponse.class)
-		if(response.getStatusInfo().statusCode == Status.NOT_FOUND.code){
+		if(response.getStatus() == Status.NOT_FOUND.code){
 			throw new NotFoundException("Node not found by uri[${uri}]")
 		}else if (response.getStatusInfo().statusCode != Status.OK.code) {
 			throw new RuntimeException("getNodeByUri[${uri}] fail.")
@@ -43,7 +43,7 @@ class Neo4jSupport {
 				.accept(MediaType.APPLICATION_JSON)
 				.type(MediaType.APPLICATION_JSON)
 				.delete(ClientResponse.class)
-		if (response.getStatusInfo().statusCode == Status.CONFLICT.code) {
+		if (response.getStatus() == Status.CONFLICT.code) {
 			throw new RuntimeException('Relationship conflict.')
 		} else if(response.getStatusInfo().statusCode != Status.NO_CONTENT.code){
 			throw new RuntimeException('Unknown error.')
