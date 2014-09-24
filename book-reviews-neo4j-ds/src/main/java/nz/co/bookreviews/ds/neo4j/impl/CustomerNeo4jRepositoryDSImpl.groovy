@@ -95,7 +95,11 @@ class CustomerNeo4jRepositoryDSImpl implements CustomerDS{
 	@Override
 	Customer assignUserToCustomer(final String customerNodeUri,
 			final String userNodeUri) {
-
+		String body ="{\"to\" : \""+userNodeUri+"\",\"type\" : \"Has\"}"
+		WebResource webResource = jerseyClient.resource(customerNodeUri).path('/relationships')
+		ClientResponse response =  webResource.accept(MediaType.APPLICATION_JSON)
+				.type(MediaType.APPLICATION_JSON)
+				.post(ClientResponse.class,body)
 		return null
 	}
 
