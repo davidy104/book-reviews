@@ -6,6 +6,7 @@ import groovy.util.logging.Slf4j
 import javax.annotation.Resource
 
 import nz.co.bookreviews.AuthenticationException
+import nz.co.bookreviews.ConflictException
 import nz.co.bookreviews.NotFoundException
 import nz.co.bookreviews.data.Page
 import nz.co.bookreviews.data.User
@@ -48,6 +49,11 @@ class UserNeo4jDSIntegrationTest {
 		log.info 'add user: {} '+add
 		assertEquals('mike',add.userName)
 		testUserNames << add.userName
+	}
+
+	@Test(expected=ConflictException.class)
+	void testCreateExistUser(){
+		userNeo4jRepositoryDs.createUser("dav", "654321")
 	}
 
 	@Test

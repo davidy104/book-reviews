@@ -1,0 +1,14 @@
+{
+	"statements":[
+		{
+			"statement":"CREATE (:Person{firstName:'Don Quixote',lastName:'',birthDate:'',email:'',member:''})"
+		},
+		{
+			"statement":"CREATE (:User{userName:'Miguel de Cervantes',password:'password'})"
+		},
+		{
+			"statement":"MATCH (p:Person {email: 'Packt Publishing'}), (u:User {userName:'Things Fall Apart'}) CREATE (u)<-[:Has]-(p)"
+		}
+		
+	]
+}

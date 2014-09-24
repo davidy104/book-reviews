@@ -10,5 +10,5 @@ interface UserDS {
 	User getUserByName(String userName)
 	User updateUserByUserName(String userName,User updatedUser)
 	void deleteUserByName(String userName)
-	Page getUsers(int currentPageNo)
+	Page getAllUsers(int pageOffset)
 }

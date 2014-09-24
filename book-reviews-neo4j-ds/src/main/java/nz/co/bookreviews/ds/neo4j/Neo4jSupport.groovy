@@ -15,9 +15,11 @@ import com.sun.jersey.api.client.ClientResponse
 import com.sun.jersey.api.client.WebResource
 
 import static nz.co.bookreviews.util.JerseyClientUtil.getResponsePayload
+
 @Component
 class Neo4jSupport {
-	def jsonSlurper = new JsonSlurper()
+	@Resource
+	JsonSlurper jsonSlurper
 	@Resource
 	Client jerseyClient
 
@@ -50,8 +52,6 @@ class Neo4jSupport {
 	String getNodeUriFromTransStatementsResponse(final String response,final int position){
 		return ((Map)((ArrayList)((Map)((ArrayList)((Map)((ArrayList)((Map)jsonSlurper.parseText(response)).get('results')).get(position)).get('data')).get(0)).get('rest')).get(0)).get('self')
 	}
-
-
 
 	Map<String,Map<String,String>> getDataFromCypherStatement(final String response){
 		def result = [:]

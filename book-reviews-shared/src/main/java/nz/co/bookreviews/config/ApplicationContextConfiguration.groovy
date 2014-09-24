@@ -1,5 +1,7 @@
 package nz.co.bookreviews.config;
 
+import groovy.json.JsonSlurper
+
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -33,5 +35,10 @@ public class ApplicationContextConfiguration {
 		ppc.setLocations(resources)
 		ppc.setIgnoreUnresolvablePlaceholders(true)
 		return ppc
+	}
+	
+	@Bean
+	JsonSlurper jsonSlurper(){
+		return new JsonSlurper()
 	}
 }

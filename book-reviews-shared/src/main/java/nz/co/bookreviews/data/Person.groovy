@@ -10,6 +10,7 @@ class Person {
 	String lastName
 	String firstName
 	Date birthDate
+	String email
 	User user
 	String nodeUri
 }

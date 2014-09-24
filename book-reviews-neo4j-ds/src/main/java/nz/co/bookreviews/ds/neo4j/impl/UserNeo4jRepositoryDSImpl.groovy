@@ -12,7 +12,7 @@ import javax.ws.rs.core.Response.Status
 import nz.co.bookreviews.AuthenticationException
 import nz.co.bookreviews.ConflictException
 import nz.co.bookreviews.NotFoundException
-import nz.co.bookreviews.data.Page;
+import nz.co.bookreviews.data.Page
 import nz.co.bookreviews.data.User
 import nz.co.bookreviews.ds.neo4j.Neo4jSupport
 import nz.co.bookreviews.ds.neo4j.UserDS
@@ -26,22 +26,32 @@ import com.sun.jersey.api.client.WebResource
 
 @Service("userNeo4jRepositoryDs")
 @Slf4j
-class UserNeo4jDSImpl implements UserDS{
+class UserNeo4jRepositoryDSImpl implements UserDS{
 
 	@Resource
 	Client jerseyClient
+
 	@Resource
 	Neo4jSupport neo4jSupport
 
 	@Value('${neo4j.host:http://localhost:7474/db/data/}')
 	String neo4jHttpUri
 
-	JsonSlurper jsonSlurper = new JsonSlurper()
+	@Resource
+	JsonSlurper jsonSlurper
 
 	@Override
 	User createUser(final String userName,final String password) {
 		log.debug 'createUser start'
-		String transLocation
+		User found
+		try {
+			found = this.getUserByName(userName)
+		} catch (e) {
+		}
+		if(found){
+			throw new ConflictException('User already Exist')
+		}
+
 		String createCypherStatement="{\"statements\":[{\"statement\":\"CREATE (n:User { userName : '"+userName+"',password : '"+password+"' }) \"},{\"statement\":\"MATCH (u {userName : '"+userName+"',password : '"+password+"'}) SET u :User RETURN u\", \"resultDataContents\":[\"REST\"]}]}"
 		log.debug 'statement json:{} $createCypherStatement'
 		WebResource webResource = jerseyClient.resource(neo4jHttpUri)
@@ -50,7 +60,7 @@ class UserNeo4jDSImpl implements UserDS{
 				.type(MediaType.APPLICATION_JSON)
 				.post(ClientResponse.class, createCypherStatement)
 		if(response.getStatusInfo().statusCode != Status.OK.code){
-			throw new Exception('User create failed.')
+			throw new RuntimeException('User create failed.')
 		}
 		String respStr = getResponsePayload(response)
 		log.debug 'response:{} $respStr'
@@ -58,7 +68,6 @@ class UserNeo4jDSImpl implements UserDS{
 		String self = neo4jSupport.getNodeUriFromTransStatementsResponse(respStr,1)
 		log.debug 'self:{} $self'
 		String uniqueNodeReqBody = "{\"value\" : \""+userName+"\",\"uri\" : \""+self+"\",\"key\" : \"userName\"}"
-
 		webResource = jerseyClient.resource(neo4jHttpUri)
 				.path("index/node/favorites").queryParam("uniqueness", "create_or_fail")
 		response = webResource.accept(MediaType.APPLICATION_JSON)
@@ -68,9 +77,9 @@ class UserNeo4jDSImpl implements UserDS{
 			try {
 				neo4jSupport.deleteNodeByUri(self)
 			} catch (e) {
-				throw new Exception('User['+self+'] create failed. it is supposed to be deleted manually.')
+				throw new RuntimeException('User['+self+'] create failed. it is supposed to be deleted manually.')
 			}
-			throw new Exception('User create failed.')
+			throw new RuntimeException('User create failed.')
 		}
 		return new User(nodeUri:self,userName:userName,password:password)
 	}
@@ -149,7 +158,7 @@ class UserNeo4jDSImpl implements UserDS{
 	}
 
 	@Override
-	Page getUsers(final int currentPageNo) {
+	Page getAllUsers(final int pageOffset) {
 		Page page
 		String queryTotalCount = "{\"query\":\"MATCH (u:User) RETURN COUNT(*) as total\"}"
 		String queryPageJson = "{\"query\":\"MATCH (u:User) RETURN u SKIP "+currentPageNo+" LIMIT "+Page.PAGE_SIZE+"\"}"
@@ -164,7 +173,7 @@ class UserNeo4jDSImpl implements UserDS{
 		String respStr = getResponsePayload(response)
 		int totalCount = Integer.valueOf(((ArrayList)((ArrayList)((Map)jsonSlurper.parseText(respStr)).get('data')).get(0)).get(0))
 		log.debug "totalCount: {} $totalCount"
-		page = new Page(currentPageNo:currentPageNo,totalCount:totalCount)
+		page = new Page(currentPageNo:pageOffset+1,totalCount:totalCount)
 		response = webResource.accept(MediaType.APPLICATION_JSON)
 				.type(MediaType.APPLICATION_JSON)
 				.post(ClientResponse.class, queryPageJson)
