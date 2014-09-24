@@ -1,20 +1,19 @@
 package nz.co.bookreviews.ds.neo4j
 
-import java.util.Map;
-
+import static nz.co.bookreviews.util.JerseyClientUtil.getResponsePayload
 import groovy.json.JsonSlurper
 
 import javax.annotation.Resource
 import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.Response.Status
 
+import nz.co.bookreviews.NotFoundException
+
 import org.springframework.stereotype.Component
 
 import com.sun.jersey.api.client.Client
 import com.sun.jersey.api.client.ClientResponse
 import com.sun.jersey.api.client.WebResource
-
-import static nz.co.bookreviews.util.JerseyClientUtil.getResponsePayload
 
 @Component
 class Neo4jSupport {
@@ -29,8 +28,10 @@ class Neo4jSupport {
 				.accept(MediaType.APPLICATION_JSON)
 				.type(MediaType.APPLICATION_JSON)
 				.get(ClientResponse.class)
-		if (response.getStatusInfo().statusCode != Status.OK.code) {
-			throw new RuntimeException('getNodeByUri[${uri}] fail.')
+		if(response.getStatusInfo().statusCode == Status.NOT_FOUND.code){
+			throw new NotFoundException("Node not found by uri[${uri}]")
+		}else if (response.getStatusInfo().statusCode != Status.OK.code) {
+			throw new RuntimeException("getNodeByUri[${uri}] fail.")
 		}
 		String respStr = getResponsePayload(response)
 		return (Map)jsonSlurper.parseText(respStr)
@@ -73,5 +74,14 @@ class Neo4jSupport {
 			}
 		}
 		return result
+	}
+
+	Map<String,String> getSingleResultFromCypherStatement(final String response){
+		def data = [:]
+		Map<String,Map<String,String>> resultMap = getDataFromCypherStatement(response)
+		Map.Entry<String,Map<String,String>> entry = resultMap.entrySet().iterator().next()
+		data.put('nodeUri', entry.getKey())
+		data.putAll(entry.getValue())
+		return data
 	}
 }

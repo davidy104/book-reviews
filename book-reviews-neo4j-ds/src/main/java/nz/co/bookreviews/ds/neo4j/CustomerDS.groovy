@@ -8,7 +8,7 @@ interface CustomerDS {
 	Customer createCustomer(Customer customer,User newUser)
 	Customer assignUserToCustomer(String customerNodeUri,String userNodeUri)
 	Page getAllCustomers(int pageOffset)
-	Customer updateCustomer(String custNodeUri,Customer updatedCustomer)
+	Customer updateCustomer(String email,Customer updatedCustomer)
 	Customer getCustomerByUri(String custNodeUri)
 	Customer getCustomerByEmail(String email)
 	List getTopMostVoteCustomers(int listSize)

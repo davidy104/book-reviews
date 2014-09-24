@@ -114,10 +114,8 @@ class UserNeo4jRepositoryDSImpl implements UserDS{
 
 	@Override
 	User updateUserByUserName(final String userName,final User updatedUser){
-		Map<String,String> mapResult = doQueryUserByName(userName)
-		String updateUserName = updatedUser.userName?:mapResult.get('userName')
-		String updatePassword = updatedUser.password?:mapResult.get('password')
-		String updateJson = "{\"query\":\"MATCH (u:User {userName: {userName}}) SET u = { props } RETURN u\",\"params\":{\"userName\":\""+userName+"\",\"props\":{\"userName\":\""+updateUserName+"\",\"password\":\""+updatePassword+"\"}}}"
+		Map resultMap
+		String updateJson = "{\"query\":\"MATCH (u:User {userName: {userName}}) SET u = { props } RETURN u\",\"params\":{\"userName\":\""+userName+"\",\"props\":{\"userName\":\""+updatedUser.userName+"\",\"password\":\""+updatedUser.password+"\"}}}"
 		WebResource webResource = jerseyClient.resource(neo4jHttpUri)
 				.path("cypher")
 		ClientResponse response = webResource.accept(MediaType.APPLICATION_JSON)
@@ -126,7 +124,16 @@ class UserNeo4jRepositoryDSImpl implements UserDS{
 		if(response.getStatusInfo().statusCode != Status.OK.code){
 			throw new RuntimeException('User update fail.')
 		}
-		return new User(nodeUri:mapResult.get('nodeUri'),password:updatePassword,userName:updateUserName)
+		try {
+			resultMap =neo4jSupport.getSingleResultFromCypherStatement(getResponsePayload(response))
+		} catch (Exception e) {
+			if(e instanceof RuntimeException && e.message == 'Data Not found.'){
+				throw new NotFoundException("User not found by userName[${userName}].")
+			}else {
+				throw e
+			}
+		}
+		return new User(nodeUri:resultMap.get('nodeUri'),password:resultMap.get('password'),userName:resultMap.get('userName'))
 	}
 
 	/**
@@ -200,16 +207,6 @@ class UserNeo4jRepositoryDSImpl implements UserDS{
 		if(response.getStatusInfo().statusCode != Status.OK.code){
 			throw new RuntimeException('Unknown exception.')
 		}
-		def data = [:]
-		Map<String,Map<String,String>> resultMap = [:]
-		try {
-			resultMap = neo4jSupport.getDataFromCypherStatement(getResponsePayload(response))
-			Map.Entry<String,Map<String,String>> entry = resultMap.entrySet().iterator().next()
-			data.put('nodeUri', entry.getKey())
-			data.putAll(entry.getValue())
-		} catch (e) {
-			throw new NotFoundException("User not found by name[${userName}].")
-		}
-		return data
+		return this.neo4jSupport.getSingleResultFromCypherStatement(getResponsePayload(response))
 	}
 }

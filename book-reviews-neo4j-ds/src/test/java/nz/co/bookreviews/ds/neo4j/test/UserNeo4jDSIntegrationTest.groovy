@@ -90,14 +90,31 @@ class UserNeo4jDSIntegrationTest {
 
 	@Test
 	void testUpdateUserByUserName(){
-		User add = userNeo4jRepositoryDs.createUser("mike", "123")
-		assertNotNull(add)
+		User updatedUser
+		User add
+		try {
+			add = userNeo4jRepositoryDs.createUser("mike", "123")
+			assertNotNull(add)
+			updatedUser = new User(userName:'jordan',password:'456')
+			updatedUser = userNeo4jRepositoryDs.updateUserByUserName("mike", updatedUser)
+			assertNotNull(updatedUser)
+			assertEquals('456',updatedUser.password)
+			assertEquals('jordan',updatedUser.userName)
+			log.info "updatedUser: {} $updatedUser"
+		} catch (e) {
+			if(updatedUser){
+				testUserNames << updatedUser.userName
+			}
+			if(add){
+				testUserNames << add.userName
+			}
+			e.printStackTrace()
+		}
+	}
+
+	@Test(expected=NotFoundException.class)
+	void testUpdateNotexistUser(){
 		User updatedUser = new User(userName:'jordan',password:'456')
-		updatedUser = userNeo4jRepositoryDs.updateUserByUserName("mike", updatedUser)
-		assertNotNull(updatedUser)
-		assertEquals('456',updatedUser.password)
-		assertEquals('jordan',updatedUser.userName)
-		log.info "updatedUser: {} $updatedUser"
-		testUserNames << updatedUser.userName
+		updatedUser = userNeo4jRepositoryDs.updateUserByUserName("xyz", updatedUser)
 	}
 }
