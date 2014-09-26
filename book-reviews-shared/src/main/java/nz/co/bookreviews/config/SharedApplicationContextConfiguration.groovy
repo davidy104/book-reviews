@@ -12,7 +12,7 @@ import com.sun.jersey.api.client.filter.LoggingFilter
 import com.sun.jersey.api.json.JSONConfiguration
 
 @Configuration
-public class ApplicationContextConfiguration {
+public class SharedApplicationContextConfiguration {
 
 	@Bean(destroyMethod = "destroy")
 	Client jerseyClient() {
