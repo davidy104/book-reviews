@@ -2,6 +2,7 @@ package nz.co.bookreviews.ds.jpa;
 
 import nz.co.bookreviews.NotFoundException
 import nz.co.bookreviews.data.Customer
+import nz.co.bookreviews.data.Page
 
 
 public interface CustomerDS {
@@ -10,4 +11,5 @@ public interface CustomerDS {
 	Customer getCustomerById(Long customerId)
 	void deleteCustomer(Long customerId)throws NotFoundException
 	Customer updateCustomer(Long customerId,Customer updateCustomer)throws NotFoundException
+	Page getCustomers(int offset)
 }

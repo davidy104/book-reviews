@@ -3,7 +3,7 @@ package nz.co.bookreviews.ds.neo4j;
 import nz.co.bookreviews.data.Page
 import nz.co.bookreviews.data.User
 
-interface UserDS {
+interface UserNeo4jRepositoryDS {
 	User createUser(String userName, String password)
 	User loginUser(String userName, String password)
 	User getUserByUri(String nodeUri)

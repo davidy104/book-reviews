@@ -4,7 +4,7 @@ import nz.co.bookreviews.data.Customer
 import nz.co.bookreviews.data.Page
 import nz.co.bookreviews.data.User
 
-interface CustomerDS {
+interface CustomerNeo4jRepositoryDS {
 	Customer createCustomer(Customer customer,User newUser)
 	Customer assignUserToCustomer(String customerNodeUri,String userNodeUri)
 	Page getAllCustomers(int pageOffset)

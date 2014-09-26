@@ -14,9 +14,9 @@ import nz.co.bookreviews.NotFoundException
 import nz.co.bookreviews.data.Customer
 import nz.co.bookreviews.data.Page
 import nz.co.bookreviews.data.User
-import nz.co.bookreviews.ds.neo4j.CustomerDS
+import nz.co.bookreviews.ds.neo4j.CustomerNeo4jRepositoryDS
 import nz.co.bookreviews.ds.neo4j.Neo4jSupport
-import nz.co.bookreviews.ds.neo4j.UserDS
+import nz.co.bookreviews.ds.neo4j.UserNeo4jRepositoryDS
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -26,7 +26,7 @@ import com.sun.jersey.api.client.ClientResponse
 import com.sun.jersey.api.client.WebResource
 @Service("customerNeo4jRepositoryDs")
 @Slf4j
-class CustomerNeo4jRepositoryDSImpl implements CustomerDS{
+class CustomerNeo4jRepositoryDSImpl implements CustomerNeo4jRepositoryDS{
 
 	@Resource
 	Client jerseyClient
@@ -40,7 +40,7 @@ class CustomerNeo4jRepositoryDSImpl implements CustomerDS{
 	JsonSlurper jsonSlurper
 
 	@Resource
-	UserDS userNeo4jRepositoryDs
+	UserNeo4jRepositoryDS userNeo4jRepositoryDs
 
 	@Override
 	Customer createCustomer(Customer customer,final User newUser) {

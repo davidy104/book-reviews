@@ -10,7 +10,7 @@ import nz.co.bookreviews.ConflictException
 import nz.co.bookreviews.NotFoundException
 import nz.co.bookreviews.data.Page
 import nz.co.bookreviews.data.User
-import nz.co.bookreviews.ds.neo4j.UserDS
+import nz.co.bookreviews.ds.neo4j.UserNeo4jRepositoryDS
 
 import org.junit.After
 import org.junit.Before
@@ -27,7 +27,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 class UserNeo4jDSIntegrationTest {
 
 	@Resource
-	UserDS userNeo4jRepositoryDs
+	UserNeo4jRepositoryDS userNeo4jRepositoryDs
 	def testUserNames = []
 
 

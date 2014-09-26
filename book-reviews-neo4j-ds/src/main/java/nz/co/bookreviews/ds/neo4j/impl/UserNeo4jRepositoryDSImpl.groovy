@@ -15,7 +15,7 @@ import nz.co.bookreviews.NotFoundException
 import nz.co.bookreviews.data.Page
 import nz.co.bookreviews.data.User
 import nz.co.bookreviews.ds.neo4j.Neo4jSupport
-import nz.co.bookreviews.ds.neo4j.UserDS
+import nz.co.bookreviews.ds.neo4j.UserNeo4jRepositoryDS
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -26,7 +26,7 @@ import com.sun.jersey.api.client.WebResource
 
 @Service("userNeo4jRepositoryDs")
 @Slf4j
-class UserNeo4jRepositoryDSImpl implements UserDS{
+class UserNeo4jRepositoryDSImpl implements UserNeo4jRepositoryDS{
 
 	@Resource
 	Client jerseyClient
