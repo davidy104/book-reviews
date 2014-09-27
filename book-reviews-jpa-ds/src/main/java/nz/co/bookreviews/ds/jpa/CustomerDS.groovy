@@ -12,4 +12,5 @@ public interface CustomerDS {
 	void deleteCustomer(Long customerId)throws NotFoundException
 	Customer updateCustomer(Long customerId,Customer updateCustomer)throws NotFoundException
 	Page getCustomers(int offset)
+	Set<Customer> getAllCustomers()
 }

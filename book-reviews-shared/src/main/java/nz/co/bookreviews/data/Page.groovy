@@ -4,7 +4,8 @@ import groovy.transform.ToString
 
 @ToString(includeNames = true, includeFields=true)
 class Page {
-	int totalCount
+	long totalCount
+	int totalPages
 	int currentPageNo
 	List content =[]
 	static int PAGE_SIZE=5

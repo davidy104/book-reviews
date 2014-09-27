@@ -1,10 +1,11 @@
 package nz.co.bookreviews.data
 
-import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 
-@ToString(includeNames = true, includeFields=true)
-@EqualsAndHashCode(includes=["personId"])
+import org.codehaus.jackson.annotate.JsonIgnore
+
+@ToString(includeSuper=true, includeNames=true)
 class Customer extends Person {
+	@JsonIgnore
 	boolean member
 }

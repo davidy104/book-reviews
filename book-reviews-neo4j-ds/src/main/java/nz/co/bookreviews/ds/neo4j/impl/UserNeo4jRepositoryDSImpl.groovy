@@ -178,7 +178,7 @@ class UserNeo4jRepositoryDSImpl implements UserNeo4jRepositoryDS{
 			throw new RuntimeException('getUsers fail.')
 		}
 		String respStr = getResponsePayload(response)
-		int totalCount = Integer.valueOf(((ArrayList)((ArrayList)((Map)jsonSlurper.parseText(respStr)).get('data')).get(0)).get(0))
+		long totalCount = Long.valueOf(((ArrayList)((ArrayList)((Map)jsonSlurper.parseText(respStr)).get('data')).get(0)).get(0))
 		log.debug "totalCount: {} $totalCount"
 		page = new Page(currentPageNo:pageOffset+1,totalCount:totalCount)
 		response = webResource.accept(MediaType.APPLICATION_JSON)

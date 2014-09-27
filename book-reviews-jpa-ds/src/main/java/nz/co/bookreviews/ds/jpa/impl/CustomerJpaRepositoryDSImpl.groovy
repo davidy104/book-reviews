@@ -43,9 +43,8 @@ class CustomerJpaRepositoryDSImpl implements  CustomerDS{
 	}
 
 	@Override
-	public Customer updateCustomer(Long customerId, Customer updateCustomer) throws NotFoundException {
-		// TODO Auto-generated method stub
-		return null;
+	Customer updateCustomer(Long customerId, Customer updateCustomer) throws NotFoundException {
+		return null
 	}
 
 	@Override
@@ -54,12 +53,25 @@ class CustomerJpaRepositoryDSImpl implements  CustomerDS{
 		org.springframework.data.domain.Page<CustomerEntity> page = customerRepository.findAll(new PageRequest(offset, Page.PAGE_SIZE))
 		int pageNumber = page.getNumber();
 		List<CustomerEntity> customers = page.getContent()
-
+		result = new Page(totalPages:page.getTotalPages(),totalCount:page.getTotalElements())
 		customers.each {
 			boolean member = it.membership==MemberShip.yes?true:false
 			result.content << new Customer(personId:it.personId,lastName:it.lastName,firstName:it.firstName,birthDate:it.birthDate,member:member,email:it.email)
 		}
+		return result
+	}
 
-		return null
+	@Override
+	Set<Customer> getAllCustomers() {
+		log.info "getAllCustomers start"
+		def customers= []
+		List<CustomerEntity> foundModels = customerRepository.findAll()
+		log.info "getAllCustomers size: {} ${foundModels.size()}"
+		foundModels.each {
+			log.info "model: {} $it"
+			boolean member = it.membership==MemberShip.yes?true:false
+			customers << new Customer(personId:it.personId,lastName:it.lastName,firstName:it.firstName,birthDate:it.birthDate,member:member,email:it.email)
+		}
+		return customers
 	}
 }
