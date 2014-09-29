@@ -30,6 +30,7 @@ class CustomerNeo4jRepositoryDSImpl implements CustomerNeo4jRepositoryDS{
 
 	@Resource
 	Client jerseyClient
+
 	@Resource
 	Neo4jSupport neo4jSupport
 
@@ -42,6 +43,9 @@ class CustomerNeo4jRepositoryDSImpl implements CustomerNeo4jRepositoryDS{
 	@Resource
 	UserNeo4jRepositoryDS userNeo4jRepositoryDs
 
+	/**
+	 * 
+	 */
 	@Override
 	Customer createCustomer(Customer customer,final User newUser) {
 		boolean createNewUser = false
@@ -52,8 +56,8 @@ class CustomerNeo4jRepositoryDSImpl implements CustomerNeo4jRepositoryDS{
 			createNewUser = true
 		}
 		int member = customer.member?1:0
-		String birthDateStr = new SimpleDateFormat("yyyy-MM-dd").parse(customer.birthDate)
-		String jsonBody = "{\"statements\":[{\"statement\":\"CREATE (p:Person{firstName:'"+customer.firstName+"',lastName:'"+customer.lastName+"',birthDate:'"+birthDateStr+"',email:'"+customer.email+"',member:'"+member+"'}) RETURN p\"}"
+		String birthDateStr = new SimpleDateFormat("yyyy-MM-dd").format(customer.birthDate)
+		String jsonBody = "{\"statements\":[{\"statement\":\"CREATE (p:Person{firstName:'"+customer.firstName+"',lastName:'"+customer.lastName+"',birthDate:'"+birthDateStr+"',email:'"+customer.email+"',member:'"+member+"'}) RETURN p\",\"resultDataContents\":[\"REST\"]}"
 		String jsonEnd ="]}"
 		if(createNewUser){
 			String userRelationshipJson = ",{\"statement\":\"MATCH (p:Person {email: '"+customer.email+"'}), (u:User {userName:'"+newUser.userName+"'}) CREATE (u)<-[:Has]-(p)\"}"
@@ -73,7 +77,12 @@ class CustomerNeo4jRepositoryDSImpl implements CustomerNeo4jRepositoryDS{
 			}
 			throw new RuntimeException('Customer create failed.')
 		}
-		String self = neo4jSupport.getNodeUriFromTransStatementsResponse(getResponsePayload(response),0)
+		String responseStr = getResponsePayload(response)
+		log.info "responseStr: {} ${responseStr}"
+
+
+
+		String self = neo4jSupport.getNodeUriFromTransStatementsResponse(responseStr,0)
 		log.debug 'self:{} $self'
 		String uniqueNodeReqBody = "{\"value\" : \""+customer.email+"\",\"uri\" : \""+self+"\",\"key\" : \"email\"}"
 		webResource = jerseyClient.resource(neo4jHttpUri)
@@ -100,15 +109,24 @@ class CustomerNeo4jRepositoryDSImpl implements CustomerNeo4jRepositoryDS{
 		ClientResponse response =  webResource.accept(MediaType.APPLICATION_JSON)
 				.type(MediaType.APPLICATION_JSON)
 				.post(ClientResponse.class,body)
-		return null
+		if(response.getStatus() != Status.CREATED.code){
+			throw new RuntimeException('assignUserToCustomer failed.')
+		}
+		User user= userNeo4jRepositoryDs.getUserByUri(userNodeUri)
+		Customer customer = this.getCustomerByUri(customerNodeUri)
+		customer.user = user
+		return customer
 	}
 
 
 
 	@Override
 	Customer getCustomerByEmail(final String email) {
-		Map<String,String> resultMap
-		String queryJson = "{\"query\":\"MATCH (p:Person) WHERE p.email = '"+email+"' RETURN p \"}"
+		Customer customer
+		User user
+		Map<String,Map<String,String>> resultMap
+		String queryJson ="{\"query\":\"MATCH (p:Person) WHERE p.email = '"+email+"' OPTIONAL MATCH (p) -[:Has]-> (u) RETURN p, u\"}"
+
 		WebResource webResource = jerseyClient.resource(neo4jHttpUri)
 				.path("cypher")
 		ClientResponse response = webResource.accept(MediaType.APPLICATION_JSON)
@@ -118,8 +136,29 @@ class CustomerNeo4jRepositoryDSImpl implements CustomerNeo4jRepositoryDS{
 		if(response.getStatus() != Status.OK.code){
 			throw new RuntimeException('Unknown exception.')
 		}
+		String responStr = getResponsePayload(response)
 		try {
-			resultMap = this.neo4jSupport.getSingleResultFromCypherStatement(getResponsePayload(response))
+			resultMap = this.neo4jSupport.getDataFromCypherStatement(responStr)
+			int index =0
+			resultMap.each {key,value->
+				Map valueMap = value
+				if(index == 0){
+					Date birthDate
+					boolean member
+					String dateStr = valueMap.get('birthDate')
+					if(dateStr){
+						birthDate = new SimpleDateFormat("yyyy-MM-dd").parse(dateStr)
+					}
+					if(resultMap.get('member')){
+						member = resultMap.get('member')==1?true:false
+					}
+					customer = new Customer(nodeUri:key,lastName:valueMap.get('lastName'),firstName:valueMap.get('firstName'),member:member,birthDate:birthDate,email:valueMap.get('email'))
+				} else {
+					user = new User(nodeUri:key,userName:valueMap.get('userName'),password:valueMap.get('password'))
+					customer.user = user
+				}
+				index++
+			}
 		} catch (e) {
 			if(e instanceof RuntimeException && e.message == 'Data Not found.'){
 				throw new NotFoundException("Customer not found by email[${email}].")
@@ -127,7 +166,7 @@ class CustomerNeo4jRepositoryDSImpl implements CustomerNeo4jRepositoryDS{
 				throw e
 			}
 		}
-		return null
+		return customer
 	}
 
 
@@ -200,5 +239,19 @@ class CustomerNeo4jRepositoryDSImpl implements CustomerNeo4jRepositoryDS{
 	@Override
 	void deleteCustomerByUri(final String custNodeUri) {
 		neo4jSupport.deleteNodeByUri(custNodeUri)
+	}
+
+	@Override
+	void deleteCustomerByEmail(final String email) {
+		String queryJson ="{\"query\":\"MATCH (p:Person) WHERE p.email = '"+email+"' OPTIONAL MATCH (p) -[r:Has]-> (u) DELETE p,r,u\"}"
+		WebResource webResource = jerseyClient.resource(neo4jHttpUri)
+				.path("cypher")
+		ClientResponse response = webResource.accept(MediaType.APPLICATION_JSON)
+				.type(MediaType.APPLICATION_JSON)
+				.post(ClientResponse.class, queryJson)
+
+		if(response.getStatus() != Status.NO_CONTENT.code){
+			throw new RuntimeException('Unknown exception.')
+		}
 	}
 }

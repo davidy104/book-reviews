@@ -1,9 +1,5 @@
 package nz.co.bookreviews.data
 
-import java.io.Serializable;
-
-import org.codehaus.jackson.annotate.JsonIgnore;
-
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 
@@ -15,7 +11,7 @@ class Person implements Serializable {
 	String firstName
 	Date birthDate
 	String email
-	@JsonIgnore
+	//	@JsonIgnore
 	User user
 	String nodeUri
 }

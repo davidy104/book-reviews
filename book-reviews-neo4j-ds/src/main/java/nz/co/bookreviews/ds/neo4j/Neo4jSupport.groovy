@@ -50,6 +50,7 @@ class Neo4jSupport {
 		}
 	}
 
+	//resultDataContents:['REST'] should be into request content
 	String getNodeUriFromTransStatementsResponse(final String response,final int position){
 		return ((Map)((ArrayList)((Map)((ArrayList)((Map)((ArrayList)((Map)jsonSlurper.parseText(response)).get('results')).get(position)).get('data')).get(0)).get('rest')).get(0)).get('self')
 	}

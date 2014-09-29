@@ -13,4 +13,5 @@ interface CustomerNeo4jRepositoryDS {
 	Customer getCustomerByEmail(String email)
 	List getTopMostVoteCustomers(int listSize)
 	void deleteCustomerByUri(String custNodeUri)
+	void deleteCustomerByEmail(String email)
 }
