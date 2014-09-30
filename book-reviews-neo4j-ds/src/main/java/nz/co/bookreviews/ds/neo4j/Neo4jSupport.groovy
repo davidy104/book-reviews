@@ -68,9 +68,14 @@ class Neo4jSupport {
 			ArrayList innerData = (ArrayList)it
 			if(innerData){
 				innerData.each {
-					Map datamap = (Map)it
-					resultDataMap = (Map)datamap['data']
-					result.put(datamap['self'] , resultDataMap)
+					if(it){
+						Map datamap = (Map)it
+						def tmpResult = datamap['data']
+						if(tmpResult){
+							resultDataMap = (Map)tmpResult
+							result.put(datamap['self'] , resultDataMap)
+						}
+					}
 				}
 			}
 		}

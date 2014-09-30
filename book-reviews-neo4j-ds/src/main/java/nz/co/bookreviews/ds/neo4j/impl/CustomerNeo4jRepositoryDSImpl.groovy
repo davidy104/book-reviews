@@ -4,8 +4,6 @@ import static nz.co.bookreviews.util.JerseyClientUtil.getResponsePayload
 import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
 
-import java.text.SimpleDateFormat
-
 import javax.annotation.Resource
 import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.Response.Status
@@ -43,6 +41,9 @@ class CustomerNeo4jRepositoryDSImpl implements CustomerNeo4jRepositoryDS{
 	@Resource
 	UserNeo4jRepositoryDS userNeo4jRepositoryDs
 
+	@Resource
+	CustomerConverter customerConverter
+
 	/**
 	 * 
 	 */
@@ -55,9 +56,8 @@ class CustomerNeo4jRepositoryDSImpl implements CustomerNeo4jRepositoryDS{
 			userNodeUri = addUser.nodeUri
 			createNewUser = true
 		}
-		int member = customer.member?1:0
-		String birthDateStr = new SimpleDateFormat("yyyy-MM-dd").format(customer.birthDate)
-		String jsonBody = "{\"statements\":[{\"statement\":\"CREATE (p:Person{firstName:'"+customer.firstName+"',lastName:'"+customer.lastName+"',birthDate:'"+birthDateStr+"',email:'"+customer.email+"',member:'"+member+"'}) RETURN p\",\"resultDataContents\":[\"REST\"]}"
+		String addCustomerStr = customerConverter.convertTo(customer,'create')
+		String jsonBody = "{\"statements\":[{\"statement\":\"CREATE (p:Person{"+addCustomerStr+"}) RETURN p\",\"resultDataContents\":[\"REST\"]}"
 		String jsonEnd ="]}"
 		if(createNewUser){
 			String userRelationshipJson = ",{\"statement\":\"MATCH (p:Person {email: '"+customer.email+"'}), (u:User {userName:'"+newUser.userName+"'}) CREATE (u)<-[:Has]-(p)\"}"
@@ -79,8 +79,6 @@ class CustomerNeo4jRepositoryDSImpl implements CustomerNeo4jRepositoryDS{
 		}
 		String responseStr = getResponsePayload(response)
 		log.info "responseStr: {} ${responseStr}"
-
-
 
 		String self = neo4jSupport.getNodeUriFromTransStatementsResponse(responseStr,0)
 		log.debug 'self:{} $self'
@@ -137,25 +135,19 @@ class CustomerNeo4jRepositoryDSImpl implements CustomerNeo4jRepositoryDS{
 			throw new RuntimeException('Unknown exception.')
 		}
 		String responStr = getResponsePayload(response)
+		log.info "getCustomerByEmail response: {} ${responStr}"
 		try {
 			resultMap = this.neo4jSupport.getDataFromCypherStatement(responStr)
 			int index =0
 			resultMap.each {key,value->
 				Map valueMap = value
-				if(index == 0){
-					Date birthDate
-					boolean member
-					String dateStr = valueMap.get('birthDate')
-					if(dateStr){
-						birthDate = new SimpleDateFormat("yyyy-MM-dd").parse(dateStr)
+				if(valueMap && !valueMap.isEmpty()){
+					if(index == 0){
+						customer = customerConverter.convertFrom(key,valueMap)
+					} else {
+						user = new User(nodeUri:key,userName:valueMap.get('userName'),password:valueMap.get('password'))
+						customer.user = user
 					}
-					if(resultMap.get('member')){
-						member = resultMap.get('member')==1?true:false
-					}
-					customer = new Customer(nodeUri:key,lastName:valueMap.get('lastName'),firstName:valueMap.get('firstName'),member:member,birthDate:birthDate,email:valueMap.get('email'))
-				} else {
-					user = new User(nodeUri:key,userName:valueMap.get('userName'),password:valueMap.get('password'))
-					customer.user = user
 				}
 				index++
 			}
@@ -173,20 +165,48 @@ class CustomerNeo4jRepositoryDSImpl implements CustomerNeo4jRepositoryDS{
 
 	@Override
 	Page getAllCustomers(int pageOffset) {
+		Page page
+		long totalCount = 0
+		String queryTotalCount = "{\"query\":\"MATCH (p:Person) WHERE HAS(p.member) RETURN COUNT(*) as total\"}"
+		String queryPageJson = "{\"query\":\"MATCH (p:Person) WHERE HAS(p.member) RETURN p SKIP "+pageOffset+" LIMIT "+Page.PAGE_SIZE+"\"}"
+		WebResource webResource = jerseyClient.resource(neo4jHttpUri)
+				.path("cypher")
+		ClientResponse response = webResource.accept(MediaType.APPLICATION_JSON)
+				.type(MediaType.APPLICATION_JSON)
+				.post(ClientResponse.class, queryTotalCount)
+		if(response.getStatus() != Status.OK.code){
+			throw new RuntimeException('getCustomers fail.')
+		}
+		String respStr = getResponsePayload(response)
+		Map rMap = (Map)jsonSlurper.parseText(respStr)
+		def dataResult = rMap.get('data')
 
-		return null
+		totalCount = Long.valueOf(((ArrayList)((ArrayList)dataResult).get(0)).get(0))
+		log.debug "totalCount: {} $totalCount"
+		page = new Page(currentPageNo:pageOffset+1,totalCount:totalCount)
+		response = webResource.accept(MediaType.APPLICATION_JSON)
+				.type(MediaType.APPLICATION_JSON)
+				.post(ClientResponse.class, queryPageJson)
+		if(response.getStatus() != Status.OK.code){
+			throw new RuntimeException('getCustomers fail.')
+		}
+		try {
+			Map<String,Map<String,String>> contentResultMap = neo4jSupport.getDataFromCypherStatement(getResponsePayload(response))
+			log.info "contentResultMap size: {} "+contentResultMap.size()
+			contentResultMap.each {k,v->
+				Map valueMap = v
+				page.content << customerConverter.convertFrom(k,valueMap)
+			}
+		} catch (e) {
+		}
+		return page
 	}
 
 	@Override
 	Customer updateCustomer(String email, Customer updatedCustomer) {
 		Map resultMap
-		def birthDateStr
-		def birthDate
-		int member = updatedCustomer.member?1:0
-		if(updatedCustomer.birthDate){
-			birthDateStr = new SimpleDateFormat("yyyy-MM-dd").parse(updatedCustomer.birthDate)
-		}
-		String updateJson = "{\"query\":\"MATCH (p:Person {email: {email}}) SET p = { props } RETURN p\",\"params\":{\"email\":\""+email+"\",\"props\":{\"member\":\""+member+"\",\"email\":\""+updatedCustomer.email+"\",\"birthDate\":\""+birthDateStr+"\",\"firstName\":\""+updatedCustomer.firstName+"\",\"lastName\":\""+updatedCustomer.lastName+"\"}}}"
+		String uptCustomerStr = customerConverter.convertTo(updatedCustomer,'update')
+		String updateJson = "{\"query\":\"MATCH (p:Person {email: {email}}) SET p = { props } RETURN p\",\"params\":{\"email\":\""+email+"\",\"props\":{"+uptCustomerStr+"}}}"
 		WebResource webResource = jerseyClient.resource(neo4jHttpUri)
 				.path("cypher")
 		ClientResponse response = webResource.accept(MediaType.APPLICATION_JSON)
@@ -204,31 +224,16 @@ class CustomerNeo4jRepositoryDSImpl implements CustomerNeo4jRepositoryDS{
 				throw e
 			}
 		}
-		String dateStr = resultMap.get('birthDate')
-		if(dateStr){
-			birthDate = new SimpleDateFormat("yyyy-MM-dd").parse(dateStr)
-		}
-		if(resultMap.get('member')){
-			member = resultMap.get('member')==1?true:false
-		}
-		return new Customer(nodeUri:resultMap.get('nodeUri'),lastName:resultMap.get('lastName'),firstName:resultMap.get('firstName'),member:member,birthDate:birthDate,email:resultMap.get('email'))
+		String nodeUril = resultMap.get('nodeUri')
+		return customerConverter.convertFrom(nodeUril, resultMap)
 	}
 
 	@Override
 	Customer getCustomerByUri(String custNodeUri) {
-		def birthDate
-		def member
 		Map resultMap = neo4jSupport.getNodeByUri(custNodeUri)
 		String uri = resultMap.get('self')
 		Map dataMap = (Map)resultMap.get('data')
-		String dateStr = dataMap.get('birthDate')
-		if(dateStr){
-			birthDate = new SimpleDateFormat("yyyy-MM-dd").parse(dateStr)
-		}
-		if(resultMap.get('member')){
-			member = resultMap.get('member')==1?true:false
-		}
-		return new Customer(nodeUri:uri,lastName:dataMap.get('lastName'),firstName:dataMap.get('firstName'),member:member,birthDate:birthDate,email:dataMap.get('email'))
+		return customerConverter.convertFrom(uri, dataMap)
 	}
 
 	@Override

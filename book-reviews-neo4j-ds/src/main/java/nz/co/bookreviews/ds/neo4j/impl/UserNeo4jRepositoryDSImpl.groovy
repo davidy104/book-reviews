@@ -187,11 +187,14 @@ class UserNeo4jRepositoryDSImpl implements UserNeo4jRepositoryDS{
 		if(response.getStatus() != Status.OK.code){
 			throw new RuntimeException('getUsers fail.')
 		}
-		Map<String,Map<String,String>> contentResultMap = neo4jSupport.getDataFromCypherStatement(getResponsePayload(response))
-		log.info "contentResultMap size: {} "+contentResultMap.size()
-		contentResultMap.each {k,v->
-			Map usrMap = v
-			page.content << new User(nodeUri:k,userName:usrMap.get('userName'),password:usrMap.get('password'))
+		try {
+			Map<String,Map<String,String>> contentResultMap = neo4jSupport.getDataFromCypherStatement(getResponsePayload(response))
+			log.info "contentResultMap size: {} "+contentResultMap.size()
+			contentResultMap.each {k,v->
+				Map usrMap = v
+				page.content << new User(nodeUri:k,userName:usrMap.get('userName'),password:usrMap.get('password'))
+			}
+		} catch (e) {
 		}
 		return page
 	}

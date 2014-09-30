@@ -10,6 +10,7 @@ import java.text.SimpleDateFormat
 import javax.annotation.Resource
 
 import nz.co.bookreviews.data.Customer
+import nz.co.bookreviews.data.Page
 import nz.co.bookreviews.data.User
 import nz.co.bookreviews.ds.neo4j.CustomerNeo4jRepositoryDS
 import nz.co.bookreviews.ds.neo4j.UserNeo4jRepositoryDS
@@ -47,6 +48,30 @@ class CustomerNeo4jDSIntegrationTest {
 	@After
 	void tearDown(){
 		testCustomerNodeUris.each { customerNeo4jRepositoryDs.deleteCustomerByUri(it) }
+	}
+
+	@Test
+	void testUpdateCustomer(){
+		try {
+			Customer updateCustomer = customerNeo4jRepositoryDs.getCustomerByEmail("jordan@gmail.com")
+			log.info "updateCustomer: {} ${updateCustomer}"
+			updateCustomer.email="update@gmail.com"
+			updateCustomer.lastName='UpdateLast'
+			updateCustomer.firstName='UpdateFirst'
+			updateCustomer = customerNeo4jRepositoryDs.updateCustomer("jordan@gmail.com", updateCustomer)
+			log.info "updateCustomer: {} ${updateCustomer}"
+		} catch (e) {
+			e.printStackTrace()
+		}
+	}
+
+	@Test
+	void testPagingCustomers(){
+		Page page = customerNeo4jRepositoryDs.getAllCustomers(1)
+		List<Customer> customers = page.getContent()
+		long totalCount = page.getTotalCount()
+		log.info "totalCount:{} ${totalCount}"
+		customers.each { log.info "customer:{} ${it}" }
 	}
 
 	@Test
