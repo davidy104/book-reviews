@@ -13,6 +13,5 @@ class Book {
 	Set<Author> authors = []
 	@Delegate
 	Publication publication = new Publication()
-
 	Set<Vote> votes = []
 }
