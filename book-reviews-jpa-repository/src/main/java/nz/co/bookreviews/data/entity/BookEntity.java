@@ -31,6 +31,9 @@ public class BookEntity implements Serializable {
 	@Column(name = "BOOK_ID", insertable = false, updatable = false)
 	private Long bookId;
 
+	@Column(name = "ISBN")
+	private String isbn;
+
 	@Column(name = "TITLE")
 	private String title;
 
@@ -119,39 +122,50 @@ public class BookEntity implements Serializable {
 		this.publication = publication;
 	}
 
-	public static Builder getBuilder(String title, Integer pages, String tags,
+	public String getIsbn() {
+		return isbn;
+	}
+
+	public void setIsbn(String isbn) {
+		this.isbn = isbn;
+	}
+
+	public static Builder getBuilder(String isbn, String title, Integer pages, String tags,
 			PublicationEntity publication) {
-		return new Builder(title, pages, tags, publication);
+		return new Builder(isbn, title, pages, tags, publication);
 	}
 
-	public static Builder getBuilder(String title, Integer pages, String tags) {
-		return new Builder(title, pages, tags);
+	public static Builder getBuilder(String isbn, String title, Integer pages, String tags) {
+		return new Builder(isbn, title, pages, tags);
 	}
 
-	public static Builder getBuilder(String title, Integer pages) {
-		return new Builder(title, pages);
+	public static Builder getBuilder(String isbn, String title, Integer pages) {
+		return new Builder(isbn, title, pages);
 	}
 
 	public static class Builder {
 
 		private BookEntity built;
 
-		public Builder(String title, Integer pages, String tags) {
+		public Builder(String isbn, String title, Integer pages, String tags) {
 			built = new BookEntity();
+			built.isbn = isbn;
 			built.title = title;
 			built.pages = pages;
 			built.tags = tags;
 		}
 
-		public Builder(String title, Integer pages) {
+		public Builder(String isbn, String title, Integer pages) {
 			built = new BookEntity();
+			built.isbn = isbn;
 			built.title = title;
 			built.pages = pages;
 		}
 
-		public Builder(String title, Integer pages, String tags,
+		public Builder(String isbn, String title, Integer pages, String tags,
 				PublicationEntity publication) {
 			built = new BookEntity();
+			built.isbn = isbn;
 			built.title = title;
 			built.pages = pages;
 			built.tags = tags;
@@ -166,22 +180,21 @@ public class BookEntity implements Serializable {
 	@Override
 	public boolean equals(Object obj) {
 		EqualsBuilder builder = new EqualsBuilder();
-		return builder.append(this.title, ((BookEntity) obj).title)
-				.append(this.pages, ((BookEntity) obj).pages)
-				.append(this.tags, ((BookEntity) obj).tags).isEquals();
+		return builder.append(this.isbn, ((BookEntity) obj).isbn)
+				.isEquals();
 	}
 
 	@Override
 	public int hashCode() {
 		HashCodeBuilder builder = new HashCodeBuilder();
-		return builder.append(this.title).append(this.pages).append(this.tags)
+		return builder.append(this.isbn)
 				.toHashCode();
 	}
 
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.DEFAULT_STYLE)
-				.append("bookId", bookId).append("title", title)
+				.append("bookId", bookId).append("title", title).append("isbn", isbn)
 				.append("pages", pages).append("tags", tags).toString();
 	}
 

@@ -1,6 +1,7 @@
 package nz.co.bookreviews.ds.jpa
 
 import nz.co.bookreviews.NotFoundException
+import nz.co.bookreviews.data.Page
 import nz.co.bookreviews.data.User
 
 
@@ -10,4 +11,5 @@ interface UserDS {
 	User getUserById(Long userId) throws NotFoundException
 	User getUserByName(String userName) throws NotFoundException
 	User updateUser(Long userId,User updatedUser) throws NotFoundException
+	Page getUsers(int pageOffset)
 }

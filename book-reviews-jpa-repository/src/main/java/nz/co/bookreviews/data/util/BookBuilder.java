@@ -11,9 +11,9 @@ public class BookBuilder extends EntityBuilder<BookEntity> {
 	void initProduct() {
 	}
 
-	public BookBuilder create(String title, int pages, String tags,
+	public BookBuilder create(String isbn, String title, int pages, String tags,
 			PublicationEntity publication) {
-		this.product = BookEntity.getBuilder(title, pages, tags, publication)
+		this.product = BookEntity.getBuilder(isbn, title, pages, tags, publication)
 				.build();
 		return this;
 	}

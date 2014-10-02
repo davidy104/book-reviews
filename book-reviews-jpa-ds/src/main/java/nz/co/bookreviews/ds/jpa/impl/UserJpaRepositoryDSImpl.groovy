@@ -7,6 +7,7 @@ import javax.annotation.Resource
 
 import nz.co.bookreviews.DuplicatedException
 import nz.co.bookreviews.NotFoundException
+import nz.co.bookreviews.data.Page
 import nz.co.bookreviews.data.User
 import nz.co.bookreviews.data.entity.UserEntity
 import nz.co.bookreviews.data.repository.UserRepository
@@ -90,5 +91,11 @@ class UserJpaRepositoryDSImpl implements UserDS{
 		}
 		userRepository.save(foundEntity)
 		return new User(userId:foundEntity.userId,userName:foundEntity.userName,createDate:foundEntity.createDate)
+	}
+
+	@Override
+	Page getUsers(final int pageOffset) {
+
+		return null;
 	}
 }

@@ -5,6 +5,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Random;
+import java.util.UUID;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -172,7 +173,7 @@ public class InitialDataSetup {
 				{
 					new BookBuilder() {
 						{
-							this.create("Things Fall Apart", 345, "novel",
+							this.create(UUID.randomUUID().toString(), "Things Fall Apart", 345, "novel",
 									publication2)
 									.addPublication(
 											PublicationEntity.getBuilder(2012,
@@ -204,7 +205,7 @@ public class InitialDataSetup {
 
 					new BookBuilder() {
 						{
-							this.create("Fairy tales", 234, null, publication1)
+							this.create(UUID.randomUUID().toString(), "Fairy tales", 234, null, publication1)
 									.addPublication(
 											PublicationEntity.getBuilder(2013,
 													publisher).build())
