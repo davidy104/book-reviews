@@ -15,6 +15,7 @@ import nz.co.bookreviews.data.User
 import nz.co.bookreviews.ds.neo4j.CustomerNeo4jRepositoryDS
 import nz.co.bookreviews.ds.neo4j.Neo4jSupport
 import nz.co.bookreviews.ds.neo4j.UserNeo4jRepositoryDS
+import nz.co.bookreviews.ds.neo4j.convert.CustomerConverter;
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service

@@ -1,4 +1,4 @@
-package nz.co.bookreviews.ds.neo4j.impl
+package nz.co.bookreviews.ds.neo4j.convert
 
 import java.text.DateFormat
 import java.text.SimpleDateFormat
