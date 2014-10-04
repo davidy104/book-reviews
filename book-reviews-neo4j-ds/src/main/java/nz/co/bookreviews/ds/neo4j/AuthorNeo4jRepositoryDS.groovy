@@ -11,4 +11,5 @@ interface AuthorNeo4jRepositoryDS {
 	Page getAuthors(int pageOffset)
 	void deleteAuthorByUri(String nodeUri)
 	void deleteAuthorByEmail(String email)
+	Author updateAuthor(String email,Author author)
 }

@@ -35,7 +35,6 @@ class UserCypherSlowTest {
 		dump("MATCH () <-[r:Votes]- (u:User) <-[:Has]- (p:Person) RETURN p,u,COUNT(*) as votes ORDER BY votes DESC")
 	}
 	
-	
 	@Test
 	void testUserVotes() {
 		dump("START b=node(5) MATCH (b:Book) <-[r:Votes]- (u:User) RETURN u, COUNT(*) as votes, SUM(r.score) as total")
