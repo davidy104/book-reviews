@@ -26,7 +26,7 @@ class CustomerConverter implements GenericConverter<Customer> {
 		if(resultMap.get('member')){
 			member = resultMap.get('member')==1?true:false
 		}
-		return new Customer(nodeUri:uri,lastName:resultMap.get('lastName'),firstName:resultMap.get('firstName'),member:member,birthDate:birthDate,email:resultMap.get('email'))
+		return new Customer(nodeUri:uri,lastName:resultMap.get('lastName'),firstName:resultMap.get('firstName'),member:member,birthDate:birthDate,email:resultMap.get('email'),customerNo:resultMap.get('customerNo'))
 	}
 
 	@Override
@@ -35,9 +35,9 @@ class CustomerConverter implements GenericConverter<Customer> {
 		int member = customer.member?1:0
 		String birthDateStr = FORMAT.format(customer.birthDate)
 		if(convertType == 'create'){
-			return "firstName:'"+customer.firstName+"',lastName:'"+customer.lastName+"',birthDate:'"+birthDateStr+"',email:'"+customer.email+"',member:'"+member+"'"
+			return "firstName:'"+customer.firstName+"',lastName:'"+customer.lastName+"',birthDate:'"+birthDateStr+"',customerNo:'"+customer.customerNo+"',email:'"+customer.email+"',member:'"+member+"'"
 		}else {
-			return "\"firstName\":\""+customer.firstName+"\",\"lastName\":\""+customer.lastName+"\",\"birthDate\":\""+birthDateStr+"\",\"email\":\""+customer.email+"\",\"member\":\""+member+"\""
+			return "\"firstName\":\""+customer.firstName+"\",\"lastName\":\""+customer.lastName+"\",\"birthDate\":\""+birthDateStr+"\",\"customerNo\":\""+customer.customerNo+"\",\"email\":\""+customer.email+"\",\"member\":\""+member+"\""
 		}
 	}
 }

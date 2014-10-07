@@ -15,7 +15,7 @@ import nz.co.bookreviews.data.User
 import nz.co.bookreviews.ds.neo4j.CustomerNeo4jRepositoryDS
 import nz.co.bookreviews.ds.neo4j.Neo4jSupport
 import nz.co.bookreviews.ds.neo4j.UserNeo4jRepositoryDS
-import nz.co.bookreviews.ds.neo4j.convert.CustomerConverter;
+import nz.co.bookreviews.ds.neo4j.convert.CustomerConverter
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -57,6 +57,7 @@ class CustomerNeo4jRepositoryDSImpl implements CustomerNeo4jRepositoryDS{
 			userNodeUri = addUser.nodeUri
 			createNewUser = true
 		}
+		customer.customerNo = "Customer_"+UUID.randomUUID().toString()
 		String addCustomerStr = customerConverter.convertTo(customer,'create')
 		String jsonBody = "{\"statements\":[{\"statement\":\"CREATE (p:Person{"+addCustomerStr+"}) RETURN p\",\"resultDataContents\":[\"REST\"]}"
 		String jsonEnd ="]}"
@@ -83,7 +84,7 @@ class CustomerNeo4jRepositoryDSImpl implements CustomerNeo4jRepositoryDS{
 
 		String self = neo4jSupport.getNodeUriFromTransStatementsResponse(responseStr,0)
 		log.debug 'self:{} $self'
-		String uniqueNodeReqBody = "{\"value\" : \""+customer.email+"\",\"uri\" : \""+self+"\",\"key\" : \"email\"}"
+		String uniqueNodeReqBody = "{\"value\" : \""+customer.customerNo+"\",\"uri\" : \""+self+"\",\"key\" : \"customerNo\"}"
 		webResource = jerseyClient.resource(neo4jHttpUri)
 				.path("index/node/favorites").queryParam("uniqueness", "create_or_fail")
 		response = webResource.accept(MediaType.APPLICATION_JSON)
@@ -162,14 +163,15 @@ class CustomerNeo4jRepositoryDSImpl implements CustomerNeo4jRepositoryDS{
 		return customer
 	}
 
-
-
+	/**
+	 * 
+	 */
 	@Override
 	Page getAllCustomers(int pageOffset) {
 		Page page
 		long totalCount = 0
-		String queryTotalCount = "{\"query\":\"MATCH (p:Person) WHERE HAS(p.member) RETURN COUNT(*) as total\"}"
-		String queryPageJson = "{\"query\":\"MATCH (p:Person) WHERE HAS(p.member) RETURN p SKIP "+pageOffset+" LIMIT "+Page.PAGE_SIZE+"\"}"
+		String queryTotalCount = "{\"query\":\"MATCH (p:Person) WHERE HAS(p.customerNo) RETURN COUNT(*) as total\"}"
+		String queryPageJson = "{\"query\":\"MATCH (p:Person) WHERE HAS(p.customerNo) RETURN p SKIP "+pageOffset+" LIMIT "+Page.PAGE_SIZE+"\"}"
 		WebResource webResource = jerseyClient.resource(neo4jHttpUri)
 				.path("cypher")
 		ClientResponse response = webResource.accept(MediaType.APPLICATION_JSON)
@@ -207,7 +209,7 @@ class CustomerNeo4jRepositoryDSImpl implements CustomerNeo4jRepositoryDS{
 	Customer updateCustomer(String email, Customer updatedCustomer) {
 		Map resultMap
 		String uptCustomerStr = customerConverter.convertTo(updatedCustomer,'update')
-		String updateJson = "{\"query\":\"MATCH (p:Person {email: {email}}) SET p = { props } RETURN p\",\"params\":{\"email\":\""+email+"\",\"props\":{"+uptCustomerStr+"}}}"
+		String updateJson = "{\"query\":\"MATCH (p:Person {email: {email}}) WHERE HAS(p.customerNo) SET p = { props } RETURN p\",\"params\":{\"email\":\""+email+"\",\"props\":{"+uptCustomerStr+"}}}"
 		WebResource webResource = jerseyClient.resource(neo4jHttpUri)
 				.path("cypher")
 		ClientResponse response = webResource.accept(MediaType.APPLICATION_JSON)
@@ -249,7 +251,7 @@ class CustomerNeo4jRepositoryDSImpl implements CustomerNeo4jRepositoryDS{
 
 	@Override
 	void deleteCustomerByEmail(final String email) {
-		String queryJson ="{\"query\":\"MATCH (p:Person) WHERE p.email = '"+email+"' OPTIONAL MATCH (p) -[r:Has]-> (u) DELETE p,r,u\"}"
+		String queryJson ="{\"query\":\"MATCH (p:Person) WHERE HAS(p.customerNo) AND p.email = '"+email+"' OPTIONAL MATCH (p) -[r:Has]-> (u) DELETE p,r,u\"}"
 		WebResource webResource = jerseyClient.resource(neo4jHttpUri)
 				.path("cypher")
 		ClientResponse response = webResource.accept(MediaType.APPLICATION_JSON)

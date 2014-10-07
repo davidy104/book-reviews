@@ -27,9 +27,9 @@ class AuthorConverter implements GenericConverter<Author> {
 		String convertType = (String)additionalSource[0]
 		String birthDateStr = FORMAT.format(author.birthDate)
 		if(convertType == 'create'){
-			return "firstName:'"+author.firstName+"',lastName:'"+author.lastName+"',birthDate:'"+birthDateStr+"',email:'"+author.email+"'"
+			return "firstName:'"+author.firstName+"',lastName:'"+author.lastName+"',birthDate:'"+birthDateStr+"',authorNo:'"+author.authorNo+"',email:'"+author.email+"'"
 		}else {
-			return "\"firstName\":\""+author.firstName+"\",\"lastName\":\""+author.lastName+"\",\"birthDate\":\""+birthDateStr+"\",\"email\":\""+author.email+"\""
+			return "\"firstName\":\""+author.firstName+"\",\"lastName\":\""+author.lastName+"\",\"birthDate\":\""+birthDateStr+"\",\"authorNo\":\""+author.authorNo+"\",\"email\":\""+author.email+"\""
 		}
 	}
 }
