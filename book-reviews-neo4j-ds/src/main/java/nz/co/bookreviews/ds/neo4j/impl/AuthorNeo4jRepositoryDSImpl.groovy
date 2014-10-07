@@ -82,7 +82,7 @@ class AuthorNeo4jRepositoryDSImpl implements AuthorNeo4jRepositoryDS{
 	Set<Author> getAuthorByName(final String firstName, final String lastName) {
 		Set<Author> resultSet = []
 		Map<String,Map<String,String>> resultMap
-		String queryJson ="{\"query\":\"MATCH (a:Author) WHERE a.firstName = '"+firstName+"' AND a.lastName = '"+lastName+"' RETURN a\"}"
+		String queryJson ="{\"query\":\"MATCH (p:Person) WHERE HAS(p.authorNo) AND p.firstName = '"+firstName+"' AND p.lastName = '"+lastName+"' RETURN p\"}"
 		WebResource webResource = jerseyClient.resource(neo4jHttpUri)
 				.path("cypher")
 		ClientResponse response = webResource.accept(MediaType.APPLICATION_JSON)
@@ -108,38 +108,34 @@ class AuthorNeo4jRepositoryDSImpl implements AuthorNeo4jRepositoryDS{
 	}
 
 	@Override
-	public Set<Author> getTopMostBooksAuthors(int listSize) {
-		
-		return null;
+	Set<Author> getTopMostBooksAuthors(int listSize) {
+
+		return null
 	}
 
 	@Override
-	public Author getAuthorByEmail(String email) {
-		// TODO Auto-generated method stub
-		return null;
+	Author getAuthorByEmail(final String email) {
+
+		return null
 	}
 
 	@Override
-	public Page getAuthors(int pageOffset) {
-		// TODO Auto-generated method stub
-		return null;
+	Page getAuthors(int pageOffset) {
+
+		return null
 	}
 
 	@Override
-	public void deleteAuthorByUri(String nodeUri) {
-		// TODO Auto-generated method stub
-
+	void deleteAuthorByUri(final String nodeUri) {
 	}
 
 	@Override
-	public void deleteAuthorByEmail(String email) {
-		// TODO Auto-generated method stub
-
+	void deleteAuthorByEmail(final String email) {
 	}
 
 	@Override
-	public Author updateAuthor(String email, Author author) {
-		// TODO Auto-generated method stub
-		return null;
+	Author updateAuthor(String email, Author author) {
+
+		return null
 	}
 }
