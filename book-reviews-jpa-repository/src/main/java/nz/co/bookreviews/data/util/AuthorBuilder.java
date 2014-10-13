@@ -11,13 +11,13 @@ public class AuthorBuilder extends EntityBuilder<AuthorEntity> {
 	void initProduct() {
 	}
 
-	public AuthorBuilder create(String lastName, String firstName,
+	public AuthorBuilder create(String authorNo, String lastName, String firstName,
 			String email, Date birthDate) {
 		if (birthDate != null) {
-			this.product = AuthorEntity.getBuilder(lastName, firstName, email,
+			this.product = AuthorEntity.getBuilder(authorNo, lastName, firstName, email,
 					birthDate).build();
 		} else {
-			this.product = AuthorEntity.getBuilder(lastName, firstName, email)
+			this.product = AuthorEntity.getBuilder(authorNo, lastName, firstName, email)
 					.build();
 		}
 		return this;

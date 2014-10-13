@@ -30,32 +30,53 @@ public class CustomerEntity extends PersonEntity implements Serializable {
 		}
 	}
 
+	@Column(name = "CUSTOMER_NO")
+	private String customerNo;
+
 	@Column(name = "MEMBERSHIP")
 	private Integer membership = MemberShip.no.value();
 
-	public static Builder getBuilder(String lastName, String firstName,
-			String email, Date birthDate) {
-		return new Builder(lastName, firstName, email, birthDate);
+	public String getCustomerNo() {
+		return customerNo;
 	}
 
-	public static Builder getBuilder(String lastName, String firstName,
+	public void setCustomerNo(String customerNo) {
+		this.customerNo = customerNo;
+	}
+
+	public Integer getMembership() {
+		return membership;
+	}
+
+	public void setMembership(Integer membership) {
+		this.membership = membership;
+	}
+
+	public static Builder getBuilder(String customerNo, String lastName, String firstName,
+			String email, Date birthDate) {
+		return new Builder(customerNo, lastName, firstName, email, birthDate);
+	}
+
+	public static Builder getBuilder(String customerNo, String lastName, String firstName,
 			String email) {
-		return new Builder(lastName, firstName, email);
+		return new Builder(customerNo, lastName, firstName, email);
 	}
 
 	public static class Builder {
 		private CustomerEntity built;
 
-		public Builder(String lastName, String firstName, String email) {
+		public Builder(String customerNo, String lastName, String firstName, String email) {
 			built = new CustomerEntity();
+			built.customerNo = customerNo;
 			built.lastName = lastName;
 			built.firstName = firstName;
 			built.email = email;
 		}
 
-		public Builder(String lastName, String firstName, String email,
+		public Builder(String customerNo, String lastName, String firstName, String email,
 				Date birthDate) {
 			built = new CustomerEntity();
+			built.customerNo = customerNo;
 			built.lastName = lastName;
 			built.firstName = firstName;
 			built.email = email;
@@ -70,7 +91,8 @@ public class CustomerEntity extends PersonEntity implements Serializable {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.DEFAULT_STYLE)
-				.append("personId", personId).append("lastName", lastName)
+				.append("personId", personId).append("customerNo", customerNo)
+				.append("lastName", lastName)
 				.append("firstName", firstName).append("email", email)
 				.append("birthDate", birthDate)
 				.append("membership", membership).toString();

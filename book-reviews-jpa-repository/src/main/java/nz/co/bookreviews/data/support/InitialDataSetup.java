@@ -111,6 +111,7 @@ public class InitialDataSetup {
 					cust1 = new CustomerBuilder() {
 						{
 							this.create(
+									UUID.randomUUID().toString(),
 									"Mike",
 									"Jordan",
 									"mike.jordan@gmail.com",
@@ -122,6 +123,7 @@ public class InitialDataSetup {
 					cust2 = new CustomerBuilder() {
 						{
 							this.create(
+									UUID.randomUUID().toString(),
 									"Ni",
 									"Joe",
 									"ni.joe@gmail.com",
@@ -140,7 +142,7 @@ public class InitialDataSetup {
 				{
 					author1 = new AuthorBuilder() {
 						{
-							this.create("Achebe", "Chinua",
+							this.create(UUID.randomUUID().toString(), "Achebe", "Chinua",
 									"Chinua.Achebe@gmail.com", null).setUser(
 									user3);
 						}
@@ -148,7 +150,7 @@ public class InitialDataSetup {
 
 					author2 = new AuthorBuilder() {
 						{
-							this.create("Andersen", "Hans Christian",
+							this.create(UUID.randomUUID().toString(), "Andersen", "Hans Christian",
 									"HansChristian.Andersen@gmail.com", null)
 									.setUser(user4);
 						}
